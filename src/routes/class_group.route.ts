@@ -27,8 +27,7 @@ router.put(
 router.delete(
 	ROUTES.CLASS_GROUP_PARAM,
 	authJwt,
-	validateRequest,
-	CatchAsync(class_groupController.update)
+	CatchAsync(class_groupController.delete)
 );
 
 export default router;

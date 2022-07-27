@@ -31,6 +31,12 @@ export class ClassRoom extends BaseController {
 		);
 		return new HttpResponse({ res, data: updatedRoom });
 	}
+
+	async delete(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id as string;
+		await class_roomService.deleteRoom(id, req.user);
+		return res.sendStatus(204);
+	}
 }
 
 export default new ClassRoom();

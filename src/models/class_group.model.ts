@@ -48,7 +48,10 @@ ClassGroupSchema.set('toJSON', {
 	},
 });
 
-ClassGroupSchema.plugin(MongooseDelete, { deletedAt: true });
+ClassGroupSchema.plugin(MongooseDelete, {
+	deletedAt: true,
+	overrideMethods: true,
+});
 const ClassGroup = model<IClassGroupDocument, IClassGroupModel>(
 	'class_groups',
 	ClassGroupSchema

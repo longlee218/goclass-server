@@ -1,8 +1,10 @@
 import { ClassGroup, ClassRoom } from '../../models';
+import { ERROR_FORBIDDEN, ERROR_NOT_FOUND } from '../../config/error';
 import { _403, _404 } from '../../config/message_code';
 
 import HttpError from '../../utils/HttpError';
 import { IUserDocument } from '../../models/user.model';
+import { Types } from 'mongoose';
 
 export class ClassGroupService {
 	async createNewGroup(name: string, user: IUserDocument) {
@@ -14,27 +16,25 @@ export class ClassGroupService {
 	}
 
 	async updateGroup(id: string, user: IUserDocument, payload: any) {
-		const group = await ClassGroup.findById(id);
-		if (!group) {
-			throw new HttpError(_404, 404, 'NOT_FOUND_ERROR');
-		}
+		const group = await ClassGroup.findById(id).orFail(
+			() => new HttpError(_404, 404, ERROR_NOT_FOUND)
+		);
 		if (!group.ownerId.equals(user._id)) {
-			throw new HttpError(_403, 403, 'FORBIDEN_ERROR');
+			throw new HttpError(_403, 403, ERROR_FORBIDDEN);
 		}
 		return await group.updateOne(payload, { new: true });
 	}
 
 	async deleteGroup(id: string, user: IUserDocument) {
-		const group = await ClassGroup.findById(id);
-		if (!group) {
-			throw new HttpError(_404, 404, 'NOT_FOUND_ERROR');
-		}
+		const group = await ClassGroup.findById(id).orFail(
+			() => new HttpError(_404, 404, ERROR_NOT_FOUND)
+		);
 		if (!group.ownerId.equals(user._id)) {
-			throw new HttpError(_403, 403, 'FORBIDEN_ERROR');
+			throw new HttpError(_403, 403, ERROR_FORBIDDEN);
 		}
 		await ClassRoom.updateMany(
-			{ ownerId: user._id, classRoomGroupId: id },
-			{ classRoomGroupId: undefined }
+			{ ownerId: user._id, classRoomGroupId: new Types.ObjectId(id) },
+			{ $unset: { classRoomGroupId: 1 } }
 		);
 		await ClassGroup.deleteById(id);
 	}

@@ -37,8 +37,7 @@ export class ClassGroupController extends BaseController {
 	async delete(req: Request, res: Response, next: NextFunction) {
 		const { params } = req;
 		await class_groupService.deleteGroup(params.id, req.user);
-		res.statusCode = 204;
-		next();
+		return res.sendStatus(204);
 	}
 }
 

@@ -29,4 +29,10 @@ router.put(
 	CatchAsync(class_roomController.update)
 );
 
+router.delete(
+	ROUTES.CLASS_ROOM_PARAM,
+	authJwt,
+	CatchAsync(class_roomController.delete)
+);
+
 export default router;

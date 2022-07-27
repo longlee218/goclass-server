@@ -83,7 +83,10 @@ ClassRoomSchema.set('toJSON', {
 	},
 });
 
-ClassRoomSchema.plugin(mongooseDelete, { deletedAt: true });
+ClassRoomSchema.plugin(mongooseDelete, {
+	deletedAt: true,
+	overrideMethods: true,
+});
 const ClassRoom = model<IClassRoomDocument, IClassRoomModel>(
 	'class_rooms',
 	ClassRoomSchema

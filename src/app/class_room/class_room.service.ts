@@ -1,3 +1,4 @@
+import { ERROR_FORBIDDEN, ERROR_NOT_FOUND } from '../../config/error';
 import { _403, _404 } from '../../config/message_code';
 
 import { ClassRoom } from '../../models';
@@ -47,12 +48,11 @@ export class ClassRoomService {
 		user: IUserDocument,
 		payload: any
 	): Promise<IClassRoomDocument | null> {
-		const classRoom = await ClassRoom.findById(id);
-		if (!classRoom) {
-			throw new HttpError(_404, 404);
-		}
+		const classRoom = await ClassRoom.findById(id).orFail(
+			() => new HttpError(_404, 404, ERROR_NOT_FOUND)
+		);
 		if (user.id !== classRoom.ownerId.toString()) {
-			throw new HttpError(_403, 403);
+			throw new HttpError(_403, 403, ERROR_FORBIDDEN);
 		}
 		if (payload.hasOwnProperty('_id')) {
 			delete payload['_id'];
@@ -61,6 +61,16 @@ export class ClassRoomService {
 			{ classRoomGroupId: null, ...payload },
 			{ new: true }
 		);
+	}
+
+	async deleteRoom(id: string, user: IUserDocument) {
+		const classRoom = await ClassRoom.findById(id).orFail(
+			() => new HttpError(_404, 404)
+		);
+		if (!classRoom.ownerId.equals(user._id)) {
+			throw new HttpError(_403, 403, ERROR_FORBIDDEN);
+		}
+		await ClassRoom.deleteById(id);
 	}
 }
 
