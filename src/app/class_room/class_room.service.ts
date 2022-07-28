@@ -5,6 +5,7 @@ import { ClassRoom } from '../../models';
 import HttpError from '../../utils/HttpError';
 import { IClassRoomDocument } from '../../models/class_room.model';
 import { IUserDocument } from '../../models/user.model';
+import { Types } from 'mongoose';
 import class_groupService from '../class_group/class_group.service';
 
 export class ClassRoomService {
@@ -48,12 +49,7 @@ export class ClassRoomService {
 		user: IUserDocument,
 		payload: any
 	): Promise<IClassRoomDocument | null> {
-		const classRoom = await ClassRoom.findById(id).orFail(
-			() => new HttpError(_404, 404, ERROR_NOT_FOUND)
-		);
-		if (user.id !== classRoom.ownerId.toString()) {
-			throw new HttpError(_403, 403, ERROR_FORBIDDEN);
-		}
+		const classRoom = await ClassRoom.findByIdOrFail(id);
 		if (payload.hasOwnProperty('_id')) {
 			delete payload['_id'];
 		}
@@ -63,14 +59,31 @@ export class ClassRoomService {
 		);
 	}
 
-	async deleteRoom(id: string, user: IUserDocument) {
-		const classRoom = await ClassRoom.findById(id).orFail(
-			() => new HttpError(_404, 404)
-		);
-		if (!classRoom.ownerId.equals(user._id)) {
-			throw new HttpError(_403, 403, ERROR_FORBIDDEN);
-		}
-		await ClassRoom.deleteById(id);
+	async deleteRoom(id: string, user: IUserDocument): Promise<void> {
+		await ClassRoom.findByIdOrFail(id, user);
+		await ClassRoom.deleteById(id, user._id);
+	}
+
+	async copyRoom(
+		id: string | Types.ObjectId,
+		user: IUserDocument
+	): Promise<any> {
+		const classRoom = await ClassRoom.findByIdOrFail(id, user);
+		delete classRoom._id;
+		return {
+			name: classRoom.name,
+			session: classRoom.session,
+			countStudents: classRoom.countStudents,
+			desc: classRoom.desc,
+			ownerId: classRoom.ownerId,
+			isExam: false,
+			examClassRoomsId: [],
+		};
+	}
+
+	increaSession(session: string) {
+		const [startYear, endYear] = session.split('-').map((str) => Number(str));
+		return [startYear + 1, endYear + 1].join('-');
 	}
 }
 

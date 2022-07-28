@@ -35,4 +35,11 @@ router.delete(
 	CatchAsync(class_roomController.delete)
 );
 
+router.post(
+	ROUTES.CLASS_ROOM_DULIPATE,
+	authJwt,
+	validateRequest,
+	CatchAsync(class_roomController.duplicate)
+);
+
 export default router;

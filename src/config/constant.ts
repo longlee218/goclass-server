@@ -9,6 +9,8 @@ export const ROUTES = {
 	USER_PROFILE: '/user/profile',
 
 	CLASS_ROOM: '/class-room',
+	CLASS_ROOM_DULIPATE: '/class-room-duplicate',
+	CLASS_ROOM_NEW_SESSION: '/class-room-session',
 	CLASS_ROOM_PARAM: '/class-room/:id',
 
 	CLASS_GROUP: '/class-group',

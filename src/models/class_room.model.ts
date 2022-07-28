@@ -5,6 +5,10 @@ import mongooseDelete, {
 	SoftDeleteModel,
 } from 'mongoose-delete';
 
+import { ERROR_NOT_FOUND } from '../config/error';
+import HttpError from '../utils/HttpError';
+import { IUserDocument } from './user.model';
+import { _404 } from '../config/message_code';
 import { makeUniqueId } from '../helpers/makeUniqueId';
 
 interface IClassRoom extends SoftDeleteInterface {
@@ -21,7 +25,12 @@ interface IClassRoom extends SoftDeleteInterface {
 
 export interface IClassRoomDocument extends IClassRoom, SoftDeleteDocument {}
 
-export interface IClassRoomModel extends SoftDeleteModel<IClassRoomDocument> {}
+export interface IClassRoomModel extends SoftDeleteModel<IClassRoomDocument> {
+	findByIdOrFail(
+		id: string | Types.ObjectId,
+		user?: IUserDocument
+	): Promise<IClassRoomDocument>;
+}
 
 const ClassRoomSchema: Schema = new Schema(
 	{
@@ -62,6 +71,20 @@ ClassRoomSchema.pre('save', function (next) {
 		next();
 	}
 });
+
+ClassRoomSchema.statics.findByIdOrFail = function (
+	id: string | Types.ObjectId,
+	user?: IUserDocument
+) {
+	if (user) {
+		return this.findOne({ _id: id, ownerId: user._id }).orFail(
+			() => new HttpError(_404, 404, ERROR_NOT_FOUND)
+		);
+	}
+	return this.findById(id).orFail(
+		() => new HttpError(_404, 404, ERROR_NOT_FOUND)
+	);
+};
 
 ClassRoomSchema.set('toJSON', {
 	transform: (

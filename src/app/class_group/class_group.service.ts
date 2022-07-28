@@ -36,7 +36,7 @@ export class ClassGroupService {
 			{ ownerId: user._id, classRoomGroupId: new Types.ObjectId(id) },
 			{ $unset: { classRoomGroupId: 1 } }
 		);
-		await ClassGroup.deleteById(id);
+		await ClassGroup.deleteById(id, user._id);
 	}
 }
 

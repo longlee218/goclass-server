@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 
 import BaseController from '../../core/base.controller';
+import { ClassRoom } from '../../models';
 import HttpResponse from '../../utils/HttpResponse';
 import class_roomService from './class_room.service';
 
-export class ClassRoom extends BaseController {
+export class ClassRoomController extends BaseController {
 	constructor() {
 		super();
 	}
@@ -37,6 +38,16 @@ export class ClassRoom extends BaseController {
 		await class_roomService.deleteRoom(id, req.user);
 		return res.sendStatus(204);
 	}
+
+	async duplicate(req: Request, res: Response, next: NextFunction) {
+		const id = req.body.id as string;
+		const payload = await class_roomService.copyRoom(id, req.user);
+		const newClass = await ClassRoom.create({
+			...payload,
+			name: payload.name + ' (copy)',
+		});
+		return new HttpResponse({ res, data: newClass });
+	}
 }
 
-export default new ClassRoom();
+export default new ClassRoomController();
