@@ -10,7 +10,7 @@ export const ROUTES = {
 
 	CLASS_ROOM: '/class-room',
 	CLASS_ROOM_DULIPATE: '/class-room-duplicate',
-	CLASS_ROOM_NEW_SESSION: '/class-room-session',
+	CLASS_ROOM_NEW_SESSION: '/class-room-new-session',
 	CLASS_ROOM_PARAM: '/class-room/:id',
 
 	CLASS_GROUP: '/class-group',

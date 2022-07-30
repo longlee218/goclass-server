@@ -28,4 +28,9 @@ export default {
 				'objectId.invalid': `"id" is not valid.`,
 			}),
 	}),
+	['POST' + ROUTES.CLASS_ROOM_NEW_SESSION]: Joi.array().items({
+		_id: Joi.string().required(),
+		name: Joi.string().required(),
+		session: Joi.string().required(),
+	}),
 };

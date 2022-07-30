@@ -46,7 +46,14 @@ export class ClassRoomController extends BaseController {
 			...payload,
 			name: payload.name + ' (copy)',
 		});
+
+		// service to add student in old class to new class
+
 		return new HttpResponse({ res, data: newClass });
+	}
+
+	async addNewSession(req: Request, res: Response, next: NextFunction) {
+		res.sendStatus(201);
 	}
 }
 

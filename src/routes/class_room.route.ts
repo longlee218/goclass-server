@@ -42,4 +42,11 @@ router.post(
 	CatchAsync(class_roomController.duplicate)
 );
 
+router.post(
+	ROUTES.CLASS_ROOM_NEW_SESSION,
+	authJwt,
+	validateRequest,
+	CatchAsync(class_roomController.addNewSession)
+);
+
 export default router;
