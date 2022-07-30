@@ -78,6 +78,7 @@ export class ClassRoomService {
 			ownerId: classRoom.ownerId,
 			isExam: false,
 			examClassRoomsId: [],
+			classRoomGroupId: classRoom?.classRoomGroupId,
 		};
 	}
 

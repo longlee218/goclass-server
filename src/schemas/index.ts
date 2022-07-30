@@ -3,7 +3,7 @@ import { default as authSchema } from './auth.schema';
 import { default as classRoomSchema } from './class_room.schema';
 
 interface SchemaOptions {
-	[name: string]: Joi.ObjectSchema<any>;
+	[name: string]: Joi.ObjectSchema<any> | Joi.ArraySchema;
 }
 const schemas: SchemaOptions = {
 	...authSchema,

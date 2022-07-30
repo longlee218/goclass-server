@@ -53,6 +53,15 @@ export class ClassRoomController extends BaseController {
 	}
 
 	async addNewSession(req: Request, res: Response, next: NextFunction) {
+		const payload = req.body;
+		const promiseActions = payload.map((item: any) => {
+			const newSession = class_roomService.increaSession(item.session);
+			return ClassRoom.updateOne(
+				{ _id: item._id },
+				{ name: item.name, session: newSession }
+			);
+		});
+		await Promise.all(promiseActions);
 		res.sendStatus(201);
 	}
 }

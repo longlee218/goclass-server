@@ -2,6 +2,12 @@ import Joi from 'joi';
 import { ROUTES } from '../config/constant';
 import { Types } from 'mongoose';
 
+const schemaClassNewSession = Joi.object().keys({
+	_id: Joi.string().required(),
+	name: Joi.string().required(),
+	session: Joi.string().required(),
+});
+
 export default {
 	['POST' + ROUTES.CLASS_ROOM]: Joi.object({
 		name: Joi.string().max(100).required(),
@@ -28,9 +34,7 @@ export default {
 				'objectId.invalid': `"id" is not valid.`,
 			}),
 	}),
-	['POST' + ROUTES.CLASS_ROOM_NEW_SESSION]: Joi.array().items({
-		_id: Joi.string().required(),
-		name: Joi.string().required(),
-		session: Joi.string().required(),
-	}),
+	['POST' + ROUTES.CLASS_ROOM_NEW_SESSION]: Joi.array().items(
+		schemaClassNewSession
+	),
 };
