@@ -6,7 +6,9 @@ export const ROUTES = {
 	AUTH_TOKEN: '/auth/token',
 	AUTH_IS_LOGIN: '/auth/am_i_login',
 	AUTH_GOOGLE_CALLBACK: '/auth/google/callback',
+
 	USER_PROFILE: '/user/profile',
+	USER_INFO: '/user/info/:id',
 
 	CLASS_ROOM: '/class-room',
 	CLASS_ROOM_DULIPATE: '/class-room-duplicate',
@@ -16,5 +18,10 @@ export const ROUTES = {
 	CLASS_GROUP: '/class-group',
 	CLASS_GROUP_PARAM: '/class-group/:id',
 
+	STUDENT: '/students',
+	STUDENT_OF_CLASS: '/students-class:classId',
+	STUDENT_OF_CLASS_PARAM: '/students-class:classId/:id',
+
 	ORGANIZATION: '/organization',
+	EMAIL: '/email',
 };

@@ -1,8 +1,4 @@
-import { ERROR_FORBIDDEN, ERROR_NOT_FOUND } from '../../config/error';
-import { _403, _404 } from '../../config/message_code';
-
 import { ClassRoom } from '../../models';
-import HttpError from '../../utils/HttpError';
 import { IClassRoomDocument } from '../../models/class_room.model';
 import { IUserDocument } from '../../models/user.model';
 import { Types } from 'mongoose';

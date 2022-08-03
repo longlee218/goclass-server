@@ -14,10 +14,9 @@ interface IUser extends SoftDeleteInterface {
 	email: string;
 	emailVerifyAt: Date;
 	isEmailVerify: boolean;
-	phone: string;
-	isVerifyPhone: boolean;
 	username: string;
 	fullname: string;
+	gender?: 'male' | 'female' | 'other';
 	prefix: string;
 	lastLogin: Date;
 	password: string;
@@ -44,13 +43,20 @@ const UserSchema: Schema<IUserDocument> = new Schema(
 	{
 		avatar: String,
 		dob: Date,
-		email: String,
+		email: {
+			type: String,
+			required: true,
+			unique: true,
+		},
 		emailVerifyAt: Date,
 		isEmailVerify: Boolean,
-		phone: String,
-		isVerifyPhone: Boolean,
 		username: String,
 		fullname: String,
+		gender: {
+			type: String,
+			enum: ['male', 'female', 'other'],
+			default: 'male',
+		},
 		prefix: String,
 		lastLogin: Date,
 		password: String,
@@ -104,7 +110,7 @@ UserSchema.methods.comparePassword = function (password: string): boolean {
 	return this.password === _hash;
 };
 
-UserSchema.pre('save', function (next) {
+UserSchema.pre('save', async function (next) {
 	if (this.isNew) {
 		this.personalKey = generateRandomKey();
 		next();

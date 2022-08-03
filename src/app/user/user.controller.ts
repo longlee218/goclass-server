@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 class UserController {
-	public async getProfile(req: Request, res: Response) {
+	public async getProfile(req: Request, res: Response, next: NextFunction) {
 		return res.status(200).json({ profile: req.user });
 	}
 }

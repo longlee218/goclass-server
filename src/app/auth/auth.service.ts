@@ -27,7 +27,9 @@ export class AuthService extends BaseService {
 		if (!googleUser.email) {
 			throw new HttpError('Login fail', 400);
 		}
-		const user = await User.findOne({ email: googleUser.email });
+		const user = await User.findOne({
+			email: googleUser.email,
+		});
 		if (user) {
 			req.user = user;
 			return done(null, user);
@@ -41,7 +43,6 @@ export class AuthService extends BaseService {
 				firstName: googleUser.family_name,
 				lastName: googleUser.given_name,
 				isActive: true,
-				isNew: true,
 				roles: [stateParse.role],
 				authType: 'google',
 				socialId: googleUser.sub,
@@ -89,14 +90,6 @@ export class AuthService extends BaseService {
 		confirm_password?: string;
 	}) {
 		const { fullname, organization, email, role, password } = payload;
-		const isExistEmail = await User.exists({ email });
-		if (isExistEmail) {
-			throw new HttpError(
-				'Email người dùng đã tồn tại.',
-				422,
-				'ValidateError'
-			);
-		}
 		try {
 			const userCreated = new User({
 				email,
@@ -104,7 +97,6 @@ export class AuthService extends BaseService {
 				fullname: fullname,
 				organization: organization,
 				isActive: true,
-				isNew: true,
 				roles: [role],
 			});
 			userCreated.setPassword(password);

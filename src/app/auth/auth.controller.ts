@@ -40,6 +40,7 @@ export class AuthController extends BaseController {
 	async authByGoogle(req: Request, res: Response, next: NextFunction) {
 		const { user } = req;
 		const tokens = await authService.makeTokenForUser(user as IUserDocument);
+		await user.updateOne({ lastLogin: new Date() }, { new: true });
 		this._saveTokenIntoCookie(res, tokens);
 		res.send(tokens);
 		// res.end('Redirect to ' + CLIENT_HOST);
@@ -68,6 +69,7 @@ export class AuthController extends BaseController {
 		const userCreated = await authService.createNewUser(body);
 		const tokens = await authService.makeTokenForUser(userCreated);
 		this._saveTokenIntoCookie(res, tokens);
+		await userCreated.updateOne({ lastLogin: new Date() }, { new: true });
 		return new HttpResponse({
 			res,
 			msg: 'ok',
@@ -81,6 +83,7 @@ export class AuthController extends BaseController {
 		const user = await authService.checkValidLogin(body);
 		const tokens = await authService.makeTokenForUser(user);
 		this._saveTokenIntoCookie(res, tokens);
+		await user.updateOne({ lastLogin: new Date() }, { new: true });
 		return new HttpResponse({ res, msg: 'ok', data: { user, tokens } });
 	}
 
