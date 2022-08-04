@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { PaginateModel, Schema, model } from 'mongoose';
 import mongooseDelete, {
 	SoftDeleteDocument,
 	SoftDeleteInterface,
@@ -7,6 +7,7 @@ import mongooseDelete, {
 
 import crypto from 'crypto';
 import generateRandomKey from '../utils/GenerateKey';
+import mongoosePaingate from 'mongoose-paginate-v2';
 
 interface IUser extends SoftDeleteInterface {
 	avatar: string;
@@ -37,9 +38,11 @@ export interface IUserDocument extends IUser, SoftDeleteDocument {
 	comparePassword: (password: string) => boolean;
 }
 
-export interface IUserModel extends SoftDeleteModel<IUserDocument> {}
+export interface IUserModel
+	extends SoftDeleteModel<IUserDocument>,
+		PaginateModel<IUserDocument> {}
 
-const UserSchema: Schema<IUserDocument> = new Schema(
+const UserSchema = new Schema(
 	{
 		avatar: String,
 		dob: Date,
@@ -145,7 +148,8 @@ UserSchema.set('toJSON', {
 	},
 });
 
-UserSchema.plugin(mongooseDelete, { deletedAt: true });
+UserSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: true });
+UserSchema.plugin(mongoosePaingate);
 
 const User = model<IUserDocument, IUserModel>('users', UserSchema);
 export default User;

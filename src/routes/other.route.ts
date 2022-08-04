@@ -11,5 +11,6 @@ router.get(
 );
 
 router.get(ROUTES.EMAIL, CatchAsync(otherController.paginateEmail));
+router.get(ROUTES.EMAIL_EXIST, CatchAsync(otherController.isExistEmail));
 
 export default router;

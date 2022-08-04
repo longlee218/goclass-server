@@ -24,4 +24,5 @@ export const ROUTES = {
 
 	ORGANIZATION: '/organization',
 	EMAIL: '/email',
+	EMAIL_EXIST: '/email-exist',
 };

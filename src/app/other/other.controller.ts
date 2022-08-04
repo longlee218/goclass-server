@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
+import { Organization, User } from '../../models';
 
 import BaseController from '../../core/base.controller';
-import { Organization } from '../../models';
 
 export class OtherController extends BaseController {
 	constructor() {
@@ -36,9 +36,9 @@ export class OtherController extends BaseController {
 	async paginateEmail(req: Request, res: Response, next: NextFunction) {
 		const query = req.query;
 		const { page, limit, sort, search } = query;
-		const results = await Organization.paginate(
+		const results = await User.paginate(
 			{
-				name: {
+				email: {
 					$regex: new RegExp((search as unknown as string) || ''),
 					$options: 'i',
 				},
@@ -50,6 +50,12 @@ export class OtherController extends BaseController {
 			}
 		);
 		return res.json(results);
+	}
+
+	async isExistEmail(req: Request, res: Response, next: NextFunction) {
+		const query = req.query;
+		const check = await User.exists({ email: query.email });
+		return res.json({ isExist: !!check });
 	}
 }
 
