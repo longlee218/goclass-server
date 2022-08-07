@@ -45,7 +45,7 @@ export class OtherController extends BaseController {
 			},
 			{
 				page: (page as unknown as number) || 1,
-				limit: (limit as unknown as number) || 10,
+				limit: (limit as unknown as number) || 6,
 				sort: sort || 'name',
 			}
 		);

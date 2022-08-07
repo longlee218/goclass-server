@@ -1,16 +1,21 @@
-import { Schema, Types, model } from 'mongoose';
+import { PaginateModel, Schema, Types, model } from 'mongoose';
 import mongooseDelete, {
 	SoftDeleteDocument,
 	SoftDeleteInterface,
 	SoftDeleteModel,
 } from 'mongoose-delete';
 
+import mongoosePaingate from 'mongoose-paginate-v2';
+
 interface IStudentClassRoom extends SoftDeleteInterface {
 	student: Types.ObjectId;
 	classRoom: Types.ObjectId;
 	isActive: boolean;
 	studentCode: string;
+	dob?: Date;
 	studentName: string;
+	email: string;
+	gender: string;
 }
 
 export interface IStudentClassRoomDocument
@@ -18,14 +23,17 @@ export interface IStudentClassRoomDocument
 		SoftDeleteDocument {}
 
 export interface IStudentClassRoomModel
-	extends SoftDeleteModel<IStudentClassRoomDocument> {}
+	extends SoftDeleteModel<IStudentClassRoomDocument>,
+		PaginateModel<IStudentClassRoomDocument> {}
+{
+}
 
-const UserClassRoomSchema: Schema<IStudentClassRoomDocument> = new Schema(
+const UserClassRoomSchema = new Schema(
 	{
 		student: {
 			type: Schema.Types.ObjectId,
 			required: true,
-			ref: 'User',
+			ref: 'users',
 		},
 		classRoom: {
 			type: Schema.Types.ObjectId,
@@ -33,6 +41,13 @@ const UserClassRoomSchema: Schema<IStudentClassRoomDocument> = new Schema(
 			ref: 'ClassRoom',
 		},
 		studentCode: String,
+		dob: Date,
+		email: String,
+		gender: {
+			type: String,
+			enum: ['male', 'female', 'other'],
+			default: 'male',
+		},
 		studentName: String,
 		isActive: {
 			type: Boolean,
@@ -48,6 +63,8 @@ UserClassRoomSchema.plugin(mongooseDelete, {
 	deletedAt: true,
 	overrideMethods: true,
 });
+UserClassRoomSchema.plugin(mongoosePaingate);
+
 const StudentClassRoom = model<
 	IStudentClassRoomDocument,
 	IStudentClassRoomModel

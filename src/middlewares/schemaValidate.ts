@@ -5,7 +5,7 @@ import Joi from 'joi';
 import Schemas from '../schemas';
 
 export default (isUseJoiError: boolean = true) => {
-	const supportHttpMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+	const supportHttpMethods = ['POST', 'PUT', 'PATCH', 'DELETE', 'GET'];
 	const validateOptions: Joi.ValidationOptions = {
 		abortEarly: false, // abort after the last validation error
 		allowUnknown: true, // allow unknown keys that will be ignored
@@ -24,7 +24,10 @@ export default (isUseJoiError: boolean = true) => {
 		) {
 			const schema = Schemas[method + path];
 			if (schema) {
-				const { error, value } = schema.validate(req.body, validateOptions);
+				const { error, value } = schema.validate(
+					method === 'GET' ? req.query : req.body,
+					validateOptions
+				);
 				if (error) {
 					const httpError = new HttpError(
 						error.details[0].message,

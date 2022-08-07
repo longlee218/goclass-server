@@ -9,6 +9,13 @@ const validateRequest = schemaValidate(true);
 const router = express.Router();
 
 router.get(
+	ROUTES.CLASS_ROOM_PARAM,
+	authJwt,
+	validateRequest,
+	CatchAsync(class_roomController.find.bind(class_roomController))
+);
+
+router.get(
 	ROUTES.CLASS_ROOM,
 	authJwt,
 	validateRequest,

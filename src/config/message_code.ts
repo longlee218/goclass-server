@@ -1,5 +1,6 @@
 export const _401 = 'Unauthorized';
 export const _404 = 'Not found';
+export const _400 = 'Bad request';
 export const _403 = 'Forbidden';
 export const _500 = 'Server error';
 export const _200 = 'Ok';

@@ -90,15 +90,35 @@ export class AuthService extends BaseService {
 		confirm_password?: string;
 	}) {
 		const { fullname, organization, email, role, password } = payload;
+		const user = await User.findOne({ email });
+		if (user && user.isActive) {
+			throw new HttpError('Tài khoản đã tồn tại trên hệ thống.', 400);
+		}
 		try {
-			const userCreated = new User({
-				email,
-				isEmailVerify: false,
-				fullname: fullname,
-				organization: organization,
-				isActive: true,
-				roles: [role],
-			});
+			let userCreated;
+			if (user && !user.isActive) {
+				userCreated = await User.findOneAndUpdate(
+					{
+						_id: user._id,
+					},
+					{
+						isEmailVerify: false,
+						fullname: fullname,
+						organization: organization,
+						isActive: true,
+						roles: [role],
+					}
+				);
+			} else {
+				userCreated = new User({
+					email,
+					isEmailVerify: false,
+					fullname: fullname,
+					organization: organization,
+					isActive: true,
+					roles: [role],
+				});
+			}
 			userCreated.setPassword(password);
 			await userCreated.save();
 			return userCreated;

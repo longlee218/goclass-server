@@ -1,7 +1,7 @@
+import { ClassRoom, StudentClassRoom } from '../../models';
 import { NextFunction, Request, Response } from 'express';
 
 import BaseController from '../../core/base.controller';
-import { ClassRoom } from '../../models';
 import HttpResponse from '../../utils/HttpResponse';
 import class_roomService from './class_room.service';
 
@@ -9,6 +9,12 @@ export class ClassRoomController extends BaseController {
 	constructor() {
 		super();
 	}
+
+	async find(req: Request, res: Response, next: NextFunction) {
+		const result = await ClassRoom.findByIdOrFail(req.params.id);
+		return new HttpResponse({ res, data: result });
+	}
+
 	async get(req: Request, res: Response, next: NextFunction) {
 		const results = await class_roomService.getClassAndGroupRoomMapping(
 			req.user
@@ -46,9 +52,18 @@ export class ClassRoomController extends BaseController {
 			...payload,
 			name: payload.name + ' (copy)',
 		});
-
-		// service to add student in old class to new class
-
+		const students = await StudentClassRoom.find({ classRoom: id });
+		const payloadStudent = students.map((value) => ({
+			student: value.student,
+			classRoom: newClass.id,
+			isActive: value.isActive,
+			studentCode: value.studentCode,
+			dob: value.dob,
+			studentName: value.studentName,
+			email: value.email,
+			gender: value.gender,
+		}));
+		await StudentClassRoom.create(payloadStudent);
 		return new HttpResponse({ res, data: newClass });
 	}
 

@@ -17,7 +17,7 @@ export default {
 	}),
 	['PUT' + ROUTES.CLASS_ROOM_PARAM]: Joi.object({
 		name: Joi.string().max(100).required(),
-		classRoomGroupId: Joi.string(),
+		classRoomGroupId: Joi.string().allow(null, ''),
 		desc: Joi.string().max(300).allow(''),
 		session: Joi.string().required(),
 	}),
