@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import assignmentSchema from './assignment.schema';
 import { default as authSchema } from './auth.schema';
 import { default as classGroupSchema } from './class_group.schema';
 import { default as classRoomSchema } from './class_room.schema';
@@ -12,6 +13,7 @@ const schemas: SchemaOptions = {
 	...classRoomSchema,
 	...classGroupSchema,
 	...studentSchema,
+	...assignmentSchema,
 };
 
 export default schemas;
