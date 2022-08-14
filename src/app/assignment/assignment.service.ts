@@ -4,6 +4,7 @@ import { Types } from 'mongoose';
 
 export class AssignmentService {
 	async getFolderAndAssignment(
+		query: any,
 		parentId: string | Types.ObjectId | null,
 		user: IUserDocument
 	) {
@@ -20,11 +21,44 @@ export class AssignmentService {
 					},
 				],
 				owner: user._id,
+				...(query.name ? { name: query.name } : {}),
 			});
 		} else {
-			folders = await AssignmentFolder.find({ parentId, owner: user._id });
+			folders = await AssignmentFolder.find({
+				parentId,
+				owner: user._id,
+				...(query.name ? { name: query.name } : {}),
+			});
 		}
 		return { folders, assignments };
+	}
+
+	async getBreadcrumps(
+		parentId: Types.ObjectId | undefined | null,
+		user: IUserDocument
+	) {
+		let itsMe: Array<Types.ObjectId> = [];
+		// means root path
+		if (!parentId) {
+			return [];
+		}
+		let folder = await AssignmentFolder.findOne({
+			owner: user._id,
+			parentId: parentId,
+		});
+		// means empty
+		if (!folder) {
+			folder = await AssignmentFolder.findOne({
+				owner: user._id,
+				_id: parentId,
+			});
+			itsMe = [parentId];
+		}
+		const belongs = [...folder.belongs, ...itsMe];
+		return await AssignmentFolder.find({
+			_id: { $in: belongs },
+			owner: user._id,
+		});
 	}
 }
 

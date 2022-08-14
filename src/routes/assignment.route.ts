@@ -21,9 +21,32 @@ router
 	.post(
 		authJwt,
 		validateRequest,
-		CatchAsync(
-			assignmentController.createCategories.bind(assignmentController)
-		)
+		CatchAsync(assignmentController.createFolder.bind(assignmentController))
 	);
+
+router.put(
+	ROUTES.ASSIGNMENT_CATEGORY_ID,
+	authJwt,
+	validateRequest,
+	CatchAsync(assignmentController.editFolder.bind(assignmentController))
+);
+
+router.delete(
+	ROUTES.ASSIGNMENT_CATEGORY_ID,
+	authJwt,
+	CatchAsync(assignmentController.deleteFolder.bind(assignmentController))
+);
+
+router.get(
+	ROUTES.ASSIGNMENT_BREADCRUMB,
+	authJwt,
+	CatchAsync(assignmentController.getBreadcrumbs.bind(assignmentController))
+);
+
+router.post(
+	ROUTES.ASSIGNMENT_INIT_BLANK,
+	authJwt,
+	CatchAsync(assignmentController.initAssignment.bind(assignmentController))
+);
 
 export default router;

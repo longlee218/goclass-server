@@ -19,6 +19,10 @@ export const ROUTES = {
 	CLASS_GROUP_PARAM: '/class-group/:id',
 
 	ASSIGNMENT_CATEGORY: '/assign/category/:parentId?',
+	ASSIGNMENT_CATEGORY_ID: '/assign-category/:id',
+	ASSIGNMENT_BREADCRUMB: '/assign/breadcrumbs',
+
+	ASSIGNMENT_INIT_BLANK: '/assign/init-blank/:parentId?',
 
 	STUDENT: '/students',
 	STUDENT_OF_CLASS: '/students-class:classId',

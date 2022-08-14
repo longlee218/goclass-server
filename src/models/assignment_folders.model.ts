@@ -12,6 +12,7 @@ interface IAssignmentFolder extends SoftDeleteInterface {
 	isShare: boolean;
 	shareTo: Array<Types.ObjectId>;
 	owner: Types.ObjectId;
+	belongs: Array<Types.ObjectId>;
 	permissions: string[];
 }
 
@@ -44,6 +45,12 @@ const AssignmentFolderSchema: Schema = new Schema(
 			type: Schema.Types.ObjectId,
 			ref: 'users',
 		},
+		belongs: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'assignment_folders',
+			},
+		],
 		permissions: [String],
 	},
 	{
