@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 
-import Assignment from '../../models/assignment.model';
 import { AssignmentFolder } from '../../models';
 import BaseController from '../../core/base.controller';
 import HttpResponse from '../../utils/HttpResponse';
-import Slide from '../../models/slides.model';
 import { Types } from 'mongoose';
 import assignmentService from './assignment.service';
 
@@ -74,35 +72,16 @@ export class AssignmentController extends BaseController {
 
 	async initAssignment(req: Request, res: Response, next: NextFunction) {
 		const parentId = req.query.parentId;
-		const assignId = new Types.ObjectId();
+		const assignment = await assignmentService.initBlank(
+			String(parentId),
+			req.user
+		);
+		return new HttpResponse({ res, data: assignment });
+	}
 
-		const folder = parentId
-			? await AssignmentFolder.findOne({
-					_id: parentId,
-					owner: req.user._id,
-			  })
-			: null;
-
-		const listSlideData = new Array(4).map((_: unknown, i: number) => ({
-			_id: new Types.ObjectId(),
-			background: '',
-			content: '',
-			sticker: '',
-			work: '',
-			order: i + 1,
-			points: 0,
-			assignment: assignId,
-		}));
-		await Slide.create(listSlideData);
-		const assignment = await Assignment.create({
-			_id: assignId,
-			name: 'Bài tập mới',
-			owner: req.user._id,
-			parentId: parentId || null,
-			slideCounts: listSlideData.length,
-			slides: listSlideData.map(({ _id }) => _id),
-			belongs: folder ? [...folder.belongs, folder._id] : [],
-		});
+	async findAssign(req: Request, res: Response, next: NextFunction) {
+		const id = String(req.params.id);
+		const assignment = await assignmentService.findById(id);
 		return new HttpResponse({ res, data: assignment });
 	}
 }

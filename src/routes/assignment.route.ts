@@ -49,4 +49,10 @@ router.post(
 	CatchAsync(assignmentController.initAssignment.bind(assignmentController))
 );
 
+router.get(
+	ROUTES.ASSIGNMENT_PARAM,
+	authJwt,
+	CatchAsync(assignmentController.findAssign.bind(assignmentController))
+);
+
 export default router;

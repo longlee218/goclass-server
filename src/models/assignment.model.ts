@@ -9,6 +9,7 @@ interface IAssignment extends SoftDeleteInterface {
 	name: string;
 	subjects: string[];
 	grades: string[];
+	access: string;
 	desc?: string;
 	permissions: string[];
 	slideCounts: Number;
@@ -30,6 +31,10 @@ const AssignmentSchema: Schema = new Schema(
 		grades: [String],
 		desc: String,
 		permissions: [String],
+		access: {
+			type: String,
+			default: 'private',
+		},
 		slideCounts: {
 			type: Number,
 			default: 0,

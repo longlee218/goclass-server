@@ -18,6 +18,7 @@ export const ROUTES = {
 	CLASS_GROUP: '/class-group',
 	CLASS_GROUP_PARAM: '/class-group/:id',
 
+	ASSIGNMENT_PARAM: '/assignment/:id',
 	ASSIGNMENT_CATEGORY: '/assign/category/:parentId?',
 	ASSIGNMENT_CATEGORY_ID: '/assign-category/:id',
 	ASSIGNMENT_BREADCRUMB: '/assign/breadcrumbs',
