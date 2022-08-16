@@ -63,7 +63,7 @@ export class AssignmentService {
 		});
 	}
 
-	async initBlank(parentId: string, user: IUserDocument) {
+	async initBlank(parentId: string | null, user: IUserDocument) {
 		const folder = parentId
 			? await AssignmentFolder.findOne({
 					_id: parentId,

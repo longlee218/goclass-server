@@ -21,6 +21,7 @@ interface IClassRoom extends SoftDeleteInterface {
 	ownerId: Types.ObjectId;
 	isExam: boolean;
 	examClassRoomsId: Array<Types.ObjectId>;
+	color?: string;
 }
 
 export interface IClassRoomDocument extends IClassRoom, SoftDeleteDocument {}
@@ -30,6 +31,8 @@ export interface IClassRoomModel extends SoftDeleteModel<IClassRoomDocument> {
 		id: string | Types.ObjectId,
 		user?: IUserDocument
 	): Promise<IClassRoomDocument>;
+	onStudentJoin(id: string | Types.ObjectId): Promise<IClassRoomDocument>;
+	onStudentLeave(id: string | Types.ObjectId): Promise<IClassRoomDocument>;
 }
 
 const ClassRoomSchema: Schema = new Schema(
@@ -60,6 +63,7 @@ const ClassRoomSchema: Schema = new Schema(
 				type: Schema.Types.ObjectId,
 			},
 		],
+		color: String,
 	},
 	{
 		timestamps: true,
@@ -84,6 +88,14 @@ ClassRoomSchema.statics.findByIdOrFail = function (
 	return this.findById(id).orFail(
 		() => new HttpError(_404, 404, ERROR_NOT_FOUND)
 	);
+};
+
+ClassRoomSchema.statics.onStudentJoin = function (id) {
+	return this.findByIdAndUpdate(id, { $inc: { countStudents: 1 } });
+};
+
+ClassRoomSchema.statics.onStudentLeave = function (id) {
+	return this.findByIdAndUpdate(id, { $inc: { countStudents: -1 } });
 };
 
 ClassRoomSchema.set('toJSON', {

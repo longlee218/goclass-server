@@ -8,7 +8,7 @@ export class ClassRoomService {
 	async getClassAndGroupRoomMapping(user: IUserDocument) {
 		const classGroups = await class_groupService.getAllGroups(user);
 		const classRooms = await ClassRoom.find({ ownerId: user.id }).sort(
-			'createdAt'
+			'session'
 		);
 		const mapping = new Map();
 		classGroups.forEach((group) => {
@@ -33,7 +33,18 @@ export class ClassRoomService {
 		return results;
 	}
 
-	async createNewRoom(user: IUserDocument, payload: object) {
+	async createNewRoom(user: IUserDocument, payload: { [key: string]: any }) {
+		const isSameName = await ClassRoom.exists({
+			name: payload.name,
+			ownerId: user._id,
+			classRoomGroupId: payload?.classRoomGroupId || null,
+		});
+		if (isSameName) {
+			payload = {
+				...payload,
+				name: payload.name + '-' + new Date().toLocaleString(),
+			};
+		}
 		return await ClassRoom.create({
 			...payload,
 			ownerId: user._id,

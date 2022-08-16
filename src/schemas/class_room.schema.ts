@@ -14,12 +14,14 @@ export default {
 		classRoomGroupId: Joi.string(),
 		desc: Joi.string().max(300).allow(''),
 		session: Joi.string().required(),
+		color: Joi.string().allow('', null).default('rgb(45, 204, 247)'),
 	}),
 	['PUT' + ROUTES.CLASS_ROOM_PARAM]: Joi.object({
 		name: Joi.string().max(100).required(),
 		classRoomGroupId: Joi.string().allow(null, ''),
 		desc: Joi.string().max(300).allow(''),
 		session: Joi.string().required(),
+		color: Joi.string().allow('', null).default('rgb(45, 204, 247)'),
 	}),
 	['POST' + ROUTES.CLASS_ROOM_DULIPATE]: Joi.object({
 		id: Joi.string()

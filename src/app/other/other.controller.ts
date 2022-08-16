@@ -8,12 +8,6 @@ export class OtherController extends BaseController {
 		super();
 	}
 
-	private _makeOptions(
-		searchField: string = 'name',
-		page: unknown,
-		limit: unknown
-	) {}
-
 	async paginateOrganization(req: Request, res: Response, next: NextFunction) {
 		const query = req.query;
 		const { page, limit, sort, search } = query;
@@ -41,6 +35,9 @@ export class OtherController extends BaseController {
 				email: {
 					$regex: new RegExp((search as unknown as string) || ''),
 					$options: 'i',
+				},
+				_id: {
+					$ne: req.user._id,
 				},
 			},
 			{

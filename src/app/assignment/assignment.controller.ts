@@ -71,11 +71,8 @@ export class AssignmentController extends BaseController {
 	}
 
 	async initAssignment(req: Request, res: Response, next: NextFunction) {
-		const parentId = req.query.parentId;
-		const assignment = await assignmentService.initBlank(
-			String(parentId),
-			req.user
-		);
+		const parentId = (req.params.parentId as string) || null;
+		const assignment = await assignmentService.initBlank(parentId, req.user);
 		return new HttpResponse({ res, data: assignment });
 	}
 

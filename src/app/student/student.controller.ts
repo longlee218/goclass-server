@@ -48,6 +48,7 @@ class StudentController {
 		const classId = req.params.classId;
 		await ClassRoom.findByIdOrFail(classId);
 		await StudentClassRoom.deleteById(idRecord);
+		await ClassRoom.onStudentLeave(classId);
 		return res.sendStatus(204);
 	}
 }

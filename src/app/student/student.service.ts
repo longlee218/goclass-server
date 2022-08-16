@@ -64,10 +64,7 @@ export class StudentService {
 			gender: payload.gender,
 			email: payload.email,
 		});
-		await ClassRoom.updateOne(
-			{ _id: classId },
-			{ $inc: { countStudents: 1 } }
-		);
+		await ClassRoom.onStudentJoin(classId);
 	}
 
 	async updateStudent(
@@ -150,30 +147,6 @@ export class StudentService {
 				},
 			}
 		);
-		// const studentsOfClass = await StudentClassRoom.find({
-		// 	classRoom: classId,
-		// 	isActive: true,
-		// });
-		// const users = await User.find({
-		// 	_id: { $in: studentsOfClass.map(({ _id }) => _id) },
-		// });
-
-		// const usersMapping = users.reduce(
-		// 	(prev: Map<Types.ObjectId, any>, current) => {
-		// 		prev.set(current._id, current.toJSON());
-		// 		return prev;
-		// 	},
-		// 	new Map()
-		// );
-
-		// studentsOfClass.forEach((student) => {
-		// 	const user = usersMapping.get(student._id);
-		// 	if (user) {
-		// 		user.fullname = student.studentName;
-		// 		user.gender = student.gender;
-		// 		user.dob = student.dob;
-		// 	}
-		// });
 	}
 
 	async checkHasStudent() {}
