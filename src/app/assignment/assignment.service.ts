@@ -5,6 +5,26 @@ import Slide from '../../models/slides.model';
 import { Types } from 'mongoose';
 
 export class AssignmentService {
+	async createFolder(
+		name: string,
+		parentId: string | null,
+		user: IUserDocument
+	) {
+		const folder = parentId
+			? await AssignmentFolder.findById(parentId)
+			: null;
+		const listName = name.split(',');
+		const payload = listName
+			.filter((e) => e)
+			.map((name) => ({
+				name,
+				parentId: parentId || null,
+				owner: user._id,
+				belongs: folder ? [...folder.belongs, folder._id] : [],
+			}));
+		return await AssignmentFolder.create(payload);
+	}
+
 	async getFolderAndAssignment(
 		query: any,
 		parentId: string | Types.ObjectId | null,
@@ -63,7 +83,7 @@ export class AssignmentService {
 		});
 	}
 
-	async initBlank(parentId: string | null, user: IUserDocument) {
+	async initBlankAssignment(parentId: string | null, user: IUserDocument) {
 		const folder = parentId
 			? await AssignmentFolder.findOne({
 					_id: parentId,
@@ -96,8 +116,12 @@ export class AssignmentService {
 		return assignment;
 	}
 
-	async findById(id: string) {
+	async findAssignmentById(id: string) {
 		return await Assignment.findById(id).populate('owner').populate('slides');
+	}
+
+	async updateById(payload: any, id: string) {
+		return await Assignment.findByIdAndUpdate(id, payload, { new: true });
 	}
 }
 

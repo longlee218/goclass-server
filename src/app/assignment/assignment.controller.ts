@@ -10,34 +10,13 @@ export class AssignmentController extends BaseController {
 	async createFolder(req: Request, res: Response, next: NextFunction) {
 		const parentId = req.params?.parentId;
 		const name = req.body.name as string;
-		const listName = name.split(',');
-		const folder = parentId
-			? await AssignmentFolder.findOne({
-					_id: parentId,
-					owner: req.user._id,
-			  })
-			: null;
-		await AssignmentFolder.create(
-			listName
-				.filter((e) => e)
-				.map((name) => ({
-					name,
-					parentId: parentId || null,
-					owner: req.user._id,
-					belongs: folder ? [...folder.belongs, folder._id] : [],
-				}))
-		);
+		await assignmentService.createFolder(name, parentId, req.user);
 		return res.sendStatus(201);
 	}
 
 	async editFolder(req: Request, res: Response, next: NextFunction) {
 		const id = req.params.id;
-		await AssignmentFolder.updateOne(
-			{
-				_id: id,
-			},
-			req.body
-		);
+		await AssignmentFolder.findByIdAndUpdate(id, req.body);
 		return res.sendStatus(204);
 	}
 
@@ -72,13 +51,23 @@ export class AssignmentController extends BaseController {
 
 	async initAssignment(req: Request, res: Response, next: NextFunction) {
 		const parentId = (req.params.parentId as string) || null;
-		const assignment = await assignmentService.initBlank(parentId, req.user);
+		const assignment = await assignmentService.initBlankAssignment(
+			parentId,
+			req.user
+		);
 		return new HttpResponse({ res, data: assignment });
 	}
 
-	async findAssign(req: Request, res: Response, next: NextFunction) {
+	async findAssignment(req: Request, res: Response, next: NextFunction) {
 		const id = String(req.params.id);
-		const assignment = await assignmentService.findById(id);
+		const assignment = await assignmentService.findAssignmentById(id);
+		return new HttpResponse({ res, data: assignment });
+	}
+
+	async editAssignment(req: Request, res: Response, next: NextFunction) {
+		const id = String(req.params.id);
+		await assignmentService.updateById(req.body, id);
+		const assignment = await assignmentService.findAssignmentById(id);
 		return new HttpResponse({ res, data: assignment });
 	}
 }

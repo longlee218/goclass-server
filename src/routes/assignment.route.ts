@@ -52,7 +52,14 @@ router.post(
 router.get(
 	ROUTES.ASSIGNMENT_PARAM,
 	authJwt,
-	CatchAsync(assignmentController.findAssign.bind(assignmentController))
+	CatchAsync(assignmentController.findAssignment.bind(assignmentController))
+);
+
+router.patch(
+	ROUTES.ASSIGNMENT_PARAM,
+	authJwt,
+	validateRequest,
+	CatchAsync(assignmentController.editAssignment.bind(assignmentController))
 );
 
 export default router;
