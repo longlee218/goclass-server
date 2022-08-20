@@ -12,14 +12,16 @@ interface IAssignment extends SoftDeleteInterface {
 	access: string;
 	desc?: string;
 	permissions: string[];
-	slideCounts: Number;
+	slideCounts: number;
 	rosters: Array<Types.ObjectId>;
 	parentId: Types.ObjectId;
 	owner: Types.ObjectId;
 	belongs: Array<Types.ObjectId>;
 }
 
-export interface IAssignmentDocument extends IAssignment, SoftDeleteDocument {}
+export interface IAssignmentDocument extends IAssignment, SoftDeleteDocument {
+	onAddNewSlide: (slideId: Types.ObjectId) => Promise<IAssignmentDocument>;
+}
 
 export interface IAssignmentModel
 	extends SoftDeleteModel<IAssignmentDocument> {}
@@ -62,6 +64,13 @@ const AssignmentSchema: Schema = new Schema(
 		timestamps: true,
 	}
 );
+
+AssignmentSchema.methods.onAddNewSlide = function (slideId: Types.ObjectId) {
+	this.slideCounts = this.slideCounts + 1;
+	this.slides = [...this.slides, slideId];
+	return this.save();
+};
+
 AssignmentSchema.set('toJSON', {
 	transform: (
 		_,

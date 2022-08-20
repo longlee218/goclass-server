@@ -25,6 +25,11 @@ export const ROUTES = {
 
 	ASSIGNMENT_INIT_BLANK: '/assign/init-blank/:parentId?',
 
+	SLIDE: '/slide',
+	SLIDE_PARAM: '/slide/:id',
+	SLIDE_DUPLICATE: '/slide/:id/duplicate',
+	SLIDE_CHANGE_ORDER: '/slide/:id/order',
+
 	STUDENT: '/students',
 	STUDENT_OF_CLASS: '/students-class:classId',
 	STUDENT_OF_CLASS_PARAM: '/students-class:classId/:id',

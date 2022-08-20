@@ -21,6 +21,10 @@ export interface IAssignmentModel extends SoftDeleteModel<ISlideDocument> {}
 
 const SlideSchema: Schema = new Schema(
 	{
+		name: {
+			type: String,
+			default: 'Slide',
+		},
 		background: {
 			type: String,
 			default: '',

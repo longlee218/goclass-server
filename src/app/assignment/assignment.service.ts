@@ -94,6 +94,7 @@ export class AssignmentService {
 		const listSlideData = [...Array(4).keys()].map(
 			(_: unknown, i: number) => ({
 				_id: new Types.ObjectId(),
+				name: 'Slide ' + (i + 1),
 				background: '',
 				content: '',
 				sticker: '',
@@ -117,7 +118,14 @@ export class AssignmentService {
 	}
 
 	async findAssignmentById(id: string) {
-		return await Assignment.findById(id).populate('owner').populate('slides');
+		return await Assignment.findById(id)
+			.populate('owner')
+			.populate({
+				path: 'slides',
+				options: {
+					sort: 'order',
+				},
+			});
 	}
 
 	async updateById(payload: any, id: string) {
