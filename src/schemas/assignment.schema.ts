@@ -9,7 +9,7 @@ export default {
 		name: Joi.string().required(),
 	}),
 	['PATCH' + ROUTES.ASSIGNMENT_PARAM]: Joi.object({
-		name: Joi.string().empty().allow('').default('Bài tập mới'),
+		name: Joi.string().empty(),
 		desc: Joi.string().empty().allow(''),
 		subjects: Joi.array().items(Joi.string()).allow(null).empty(),
 		grades: Joi.array().items(Joi.string()).allow(null).empty(),

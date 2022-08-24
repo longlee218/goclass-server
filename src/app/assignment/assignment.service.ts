@@ -45,8 +45,25 @@ export class AssignmentService {
 				owner: user._id,
 				...(query.name ? { name: query.name } : {}),
 			});
+			assignments = await Assignment.find({
+				$or: [
+					{
+						parentId: { $exists: false },
+					},
+					{
+						parentId: null,
+					},
+				],
+				owner: user._id,
+				...(query.name ? { name: query.name } : {}),
+			});
 		} else {
 			folders = await AssignmentFolder.find({
+				parentId,
+				owner: user._id,
+				...(query.name ? { name: query.name } : {}),
+			});
+			assignments = await Assignment.find({
 				parentId,
 				owner: user._id,
 				...(query.name ? { name: query.name } : {}),
@@ -129,6 +146,7 @@ export class AssignmentService {
 	}
 
 	async updateById(payload: any, id: string) {
+		console.log(payload);
 		return await Assignment.findByIdAndUpdate(id, payload, { new: true });
 	}
 }

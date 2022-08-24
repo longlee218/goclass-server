@@ -1,20 +1,9 @@
-import express, { Express, NextFunction, Request, Response } from 'express';
-
-import CatchAsync from './utils/CatchAsync';
-import { PREFIX_API_V1 } from './config/key';
-import { ROUTES } from './config/constant';
-import authController from './app/auth/auth.controller';
-import authRoute from './routes/auth.route';
-import bodyParser from 'body-parser';
+import ExpressServer from './utils/ExpressServer';
+import SocketServer from './utils/Socket';
 import { connectMongoDB } from './services/db.service';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import corsOptions from './cors';
 import dotenv from 'dotenv';
-import helmet from 'helmet';
 import http from 'http';
-import makeRoutes from './routes';
-import passport from 'passport';
+import { normalizePort } from './helpers/server.helper';
 import passportService from './services/passport.service';
 import path from 'path';
 
@@ -22,24 +11,11 @@ dotenv.config({
 	path: path.join(process.cwd(), '.env'),
 });
 
-const normalizePort = (val: string) => {
-	const port = parseInt(val, 10);
-	if (isNaN(port)) {
-		return val;
-	}
-	if (port >= 0) {
-		return port;
-	}
-	return false;
-};
-
 /**
  * App Variables
  */
 const port = normalizePort(process.env.PORT || '8080');
-const app: Express = express();
-app.set('port', port);
-
+const app = ExpressServer(port);
 /**
  * Event listener for HTTP server "error" event.
  */
@@ -77,52 +53,14 @@ httpServer.on('listening', onListenning);
 httpServer.on('error', onError);
 
 /**
+ *  Socket server
+ */
+const socket = SocketServer(httpServer);
+/**
  * Connect database
  */
 connectMongoDB();
 passportService();
-
-/**
- *  App Configuration
- */
-app.use(passport.initialize());
-app.use(helmet());
-app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(cookieParser(process.env.SESSION_SECRECT));
-
-// app.use((req, res, next) => {
-// 	res.append('Access-Control-Allow-Origin', ['*']);
-// 	res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-// 	res.append('Access-Control-Allow-Headers', 'Content-Type');
-// 	res.setHeader('Content-Type', 'application/json');
-// 	next();
-// });
-
-/**
- * Server Routes
- */
-makeRoutes(app);
-app.get('*', function (req, res, next) {
-	return res.status(404).json({
-		isSuccess: false,
-		error: 'Not found this route.',
-	});
-});
-
-/**
- * Catch error process
- */
-app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-	return res.status(error.status || 500).json({
-		isSuccess: false,
-		error: error.message,
-		stacks: error.stack,
-	});
-});
 
 process.on('uncaughtException', (err) => {
 	console.log('Error process: ' + err);

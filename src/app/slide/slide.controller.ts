@@ -53,9 +53,7 @@ export class SlideController extends BaseController {
 		const slide = await Slide.findById(id);
 		const currentOrder = Number(slide.order);
 		const changeOrder = Number(order);
-		if (currentOrder === changeOrder) {
-			return res.sendStatus(204);
-		}
+
 		if (currentOrder < changeOrder) {
 			await Slide.updateMany(
 				{
@@ -66,8 +64,7 @@ export class SlideController extends BaseController {
 					$inc: { order: -1 },
 				}
 			);
-		}
-		if (currentOrder > changeOrder) {
+		} else if (currentOrder > changeOrder) {
 			await Slide.updateMany(
 				{
 					assignment: slide.assignment,
@@ -77,6 +74,8 @@ export class SlideController extends BaseController {
 					$inc: { order: 1 },
 				}
 			);
+		} else {
+			return res.sendStatus(204);
 		}
 		slide.order = changeOrder;
 		await slide.save();

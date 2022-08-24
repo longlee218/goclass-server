@@ -6,10 +6,9 @@ import mongooseDelete, {
 } from 'mongoose-delete';
 
 interface ISlide extends SoftDeleteInterface {
-	background: string;
-	content: string;
-	sticker: string;
-	work: string;
+	elements: Array<object>;
+	appState: object;
+	files: object;
 	order: number;
 	points: number;
 	assignment: Types.ObjectId;
@@ -25,22 +24,9 @@ const SlideSchema: Schema = new Schema(
 			type: String,
 			default: 'Slide',
 		},
-		background: {
-			type: String,
-			default: '',
-		},
-		content: {
-			type: String,
-			default: '',
-		},
-		sticker: {
-			type: String,
-			default: '',
-		},
-		work: {
-			type: String,
-			default: '',
-		},
+		elements: [Schema.Types.Mixed],
+		appState: Schema.Types.Mixed,
+		files: Schema.Types.Mixed,
 		order: Number,
 		points: {
 			type: Number,

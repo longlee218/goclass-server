@@ -80,6 +80,7 @@ export class AuthController extends BaseController {
 
 	async login(req: Request, res: Response, next: NextFunction) {
 		const { body } = req;
+		console.log({ body });
 		const user = await authService.checkValidLogin(body);
 		const tokens = await authService.makeTokenForUser(user);
 		this._saveTokenIntoCookie(res, tokens);
