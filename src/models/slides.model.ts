@@ -11,6 +11,8 @@ interface ISlide extends SoftDeleteInterface {
 	files: object;
 	order: number;
 	points: number;
+	desc: string;
+	thumbnail: string;
 	assignment: Types.ObjectId;
 }
 
@@ -24,6 +26,7 @@ const SlideSchema: Schema = new Schema(
 			type: String,
 			default: 'Slide',
 		},
+		desc: String,
 		elements: [Schema.Types.Mixed],
 		appState: Schema.Types.Mixed,
 		files: Schema.Types.Mixed,
@@ -32,6 +35,7 @@ const SlideSchema: Schema = new Schema(
 			type: Number,
 			default: 0,
 		},
+		thumbnail: String,
 		assignment: {
 			type: Schema.Types.ObjectId,
 			ref: 'assignments',

@@ -20,14 +20,13 @@ const slideSocket = (socket: Socket) => {
 
 	socket.on('edit', async (payload: any, id: string) => {
 		console.log('emiiting ' + new Date().getTime());
-		await Slide.findByIdAndUpdate(id, payload);
-	});
-
-	socket.on('update', (payload: any, id: string) => {
 		socket.broadcast.to(id).emit('updated', payload);
 	});
 
-	socket.on('save', async (payload: any, id: string) => {});
+	socket.on('save', async (payload: any, id: string) => {
+		console.log('prev save');
+		await Slide.findByIdAndUpdate(id, payload);
+	});
 };
 
 export default slideSocket;
