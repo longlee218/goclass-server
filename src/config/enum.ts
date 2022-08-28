@@ -9,3 +9,8 @@ export enum EnumGender {
 	Female = 'female',
 	Other = 'other',
 }
+
+export enum EnumStatusRoster {
+	Online = 'online',
+	Offline = 'offline',
+}

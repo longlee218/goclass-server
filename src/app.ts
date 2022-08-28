@@ -48,14 +48,15 @@ const onListenning = () => {
  * Server Activation
  */
 const httpServer = http.createServer(app);
+/**
+ *  Socket server
+ */
+SocketServer(httpServer);
+
 httpServer.listen(port);
 httpServer.on('listening', onListenning);
 httpServer.on('error', onError);
 
-/**
- *  Socket server
- */
-const socket = SocketServer(httpServer);
 /**
  * Connect database
  */

@@ -41,29 +41,7 @@ function ExpressServer(port: number | string | boolean) {
 	/**
 	 * Server Routes
 	 */
-	app.get('/', function (req: Request, res, next) {
-		res.send('Success');
-	});
 	makeRoutes(app);
-
-	app.get('*', function (req, res, next) {
-		return res.status(404).json({
-			isSuccess: false,
-			error: 'Not found this route.',
-		});
-	});
-
-	/**
-	 * Catch error process
-	 */
-	app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-		return res.status(error.status || 500).json({
-			isSuccess: false,
-			error: error.message,
-			stacks: error.stack,
-		});
-	});
-
 	return app;
 }
 

@@ -5,7 +5,7 @@ import mongooseDelete, {
 	SoftDeleteModel,
 } from 'mongoose-delete';
 
-interface ISlide extends SoftDeleteInterface {
+interface ISlideStream extends SoftDeleteInterface {
 	elements: Array<object>;
 	appState: object;
 	files: object;
@@ -16,16 +16,16 @@ interface ISlide extends SoftDeleteInterface {
 	assignment: Types.ObjectId;
 }
 
-export interface ISlideDocument extends ISlide, SoftDeleteDocument {}
+export interface ISlideStreamDocument
+	extends ISlideStream,
+		SoftDeleteDocument {}
 
-export interface ISlideModel extends SoftDeleteModel<ISlideDocument> {}
+export interface ISlideStreamModel
+	extends SoftDeleteModel<ISlideStreamDocument> {}
 
-const SlideSchema: Schema = new Schema(
+const SlideStreamSchema: Schema = new Schema(
 	{
-		name: {
-			type: String,
-			default: 'Slide',
-		},
+		name: String,
 		desc: String,
 		elements: [Schema.Types.Mixed],
 		appState: Schema.Types.Mixed,
@@ -38,14 +38,14 @@ const SlideSchema: Schema = new Schema(
 		thumbnail: String,
 		assignment: {
 			type: Schema.Types.ObjectId,
-			ref: 'assignments',
+			ref: 'assignment_streams',
 		},
 	},
 	{
 		timestamps: true,
 	}
 );
-SlideSchema.set('toJSON', {
+SlideStreamSchema.set('toJSON', {
 	transform: (
 		_,
 		ret: {
@@ -61,10 +61,13 @@ SlideSchema.set('toJSON', {
 	},
 });
 
-SlideSchema.plugin(mongooseDelete, {
+SlideStreamSchema.plugin(mongooseDelete, {
 	deletedAt: true,
 	overrideMethods: true,
 });
 
-const Slide = model<ISlideDocument, ISlideModel>('slides', SlideSchema);
-export default Slide;
+const SlideStream = model<ISlideStreamDocument, ISlideStreamModel>(
+	'slide_streams',
+	SlideStreamSchema
+);
+export default SlideStream;

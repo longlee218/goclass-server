@@ -70,6 +70,18 @@ export class AssignmentController extends BaseController {
 		const assignment = await assignmentService.findAssignmentById(id);
 		return new HttpResponse({ res, data: assignment });
 	}
+
+	async deleteAssignment(req: Request, res: Response, next: NextFunction) {
+		const id = String(req.params.id);
+		await assignmentService.deleteById(id);
+		return res.sendStatus(204);
+	}
+
+	async duplicateAssignment(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id as string;
+		const assignCopy = await assignmentService.copyAssignment(id, req.user);
+		return new HttpResponse({ res, data: assignCopy });
+	}
 }
 
 export default new AssignmentController();

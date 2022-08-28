@@ -1,6 +1,9 @@
-import Assignment from '../../models/assignment.model';
+import Assignment, { IAssignmentDocument } from '../../models/assignment.model';
+
 import { AssignmentFolder } from '../../models';
+import { EnumStatusRoster } from '../../config/enum';
 import { IUserDocument } from '../../models/user.model';
+import Roster from '../../models/roster.model';
 import Slide from '../../models/slides.model';
 import { Types } from 'mongoose';
 
@@ -122,6 +125,10 @@ export class AssignmentService {
 			})
 		);
 		await Slide.create(listSlideData);
+		const roster = await Roster.create({
+			status: EnumStatusRoster.Offline,
+			assignment: assignId,
+		});
 		const assignment = await Assignment.create({
 			_id: assignId,
 			name: 'Bài tập mới',
@@ -130,7 +137,9 @@ export class AssignmentService {
 			slideCounts: listSlideData.length,
 			slides: listSlideData.map(({ _id }) => _id),
 			belongs: folder ? [...folder.belongs, folder._id] : [],
+			roster: roster._id,
 		});
+
 		return assignment;
 	}
 
@@ -146,8 +155,50 @@ export class AssignmentService {
 	}
 
 	async updateById(payload: any, id: string) {
-		console.log(payload);
 		return await Assignment.findByIdAndUpdate(id, payload, { new: true });
+	}
+
+	async deleteById(id: string) {
+		return await Assignment.findByIdAndDelete(id);
+	}
+
+	async copyAssignment(
+		id: string,
+		user: IUserDocument
+	): Promise<IAssignmentDocument> {
+		const { assignmentData, listSlideData } =
+			await this.makeCopyAssignmentData(id, user);
+		await Slide.create(listSlideData);
+		return await Assignment.create(assignmentData);
+	}
+
+	async makeCopyAssignmentData(
+		id: string | Types.ObjectId,
+		user: IUserDocument,
+		suffixName: string = ' (copy)'
+	) {
+		const assignment = await Assignment.findByIdOrFail(id, user);
+		const assignId = new Types.ObjectId();
+		const slides = await Slide.find({ assignment: assignment._id });
+		const listSlideData = slides.map((slide) => ({
+			...slide.toJSON(),
+			_id: new Types.ObjectId(),
+			assignment: assignId,
+		}));
+		const assignmentData = {
+			_id: assignId,
+			name: assignment.name + suffixName,
+			subjects: assignment.subjects,
+			grades: assignment.grades,
+			desc: assignment.desc,
+			permissions: assignment.permissions,
+			slideCounts: assignment.slideCounts,
+			parentId: assignment.parentId,
+			owner: assignment.owner,
+			belongs: assignment.owner,
+			slides: listSlideData.map(({ _id }) => _id),
+		};
+		return { listSlideData, assignmentData };
 	}
 }
 

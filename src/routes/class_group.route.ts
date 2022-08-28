@@ -12,22 +12,13 @@ router.get(ROUTES.CLASS_GROUP, authJwt, CatchAsync(class_groupController.get));
 
 router.post(
 	ROUTES.CLASS_GROUP,
-	authJwt,
-	validateRequest,
+	[authJwt, validateRequest],
 	CatchAsync(class_groupController.create)
 );
 
-router.put(
-	ROUTES.CLASS_GROUP_PARAM,
-	authJwt,
-	validateRequest,
-	CatchAsync(class_groupController.update)
-);
-
-router.delete(
-	ROUTES.CLASS_GROUP_PARAM,
-	authJwt,
-	CatchAsync(class_groupController.delete)
-);
+router
+	.route(ROUTES.CLASS_GROUP_PARAM)
+	.put([authJwt, validateRequest], CatchAsync(class_groupController.update))
+	.delete([authJwt], CatchAsync(class_groupController.delete));
 
 export default router;

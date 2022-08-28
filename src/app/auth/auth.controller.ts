@@ -1,5 +1,6 @@
 import { CookieOptions, NextFunction, Request, Response } from 'express';
 
+import { Auth } from '../../types/request';
 import BaseController from '../../core/base.controller';
 import HttpResponse from '../../utils/HttpResponse';
 import { IUserDocument } from '../../models/user.model';
@@ -65,7 +66,7 @@ export class AuthController extends BaseController {
 	}
 
 	async register(req: Request, res: Response, next: NextFunction) {
-		const { body } = req;
+		const body = req.body as Auth.RequestRegister;
 		const userCreated = await authService.createNewUser(body);
 		const tokens = await authService.makeTokenForUser(userCreated);
 		this._saveTokenIntoCookie(res, tokens);
@@ -79,8 +80,7 @@ export class AuthController extends BaseController {
 	}
 
 	async login(req: Request, res: Response, next: NextFunction) {
-		const { body } = req;
-		console.log({ body });
+		const body = req.body as Auth.RequestLogin;
 		const user = await authService.checkValidLogin(body);
 		const tokens = await authService.makeTokenForUser(user);
 		this._saveTokenIntoCookie(res, tokens);

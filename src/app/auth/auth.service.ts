@@ -5,6 +5,7 @@ import {
 import User, { IUserDocument } from '../../models/user.model';
 import jwtService, { JWTService } from '../../services/jwt.service';
 
+import { Auth } from '../../types/request';
 import BaseService from '../../core/base.service';
 import HttpError from '../../utils/HttpError';
 import { VerifiedCallback as JwtVerifiedCallback } from 'passport-jwt';
@@ -81,14 +82,7 @@ export class AuthService extends BaseService {
 		return await this.makeTokenForUser(user);
 	}
 
-	async createNewUser(payload: {
-		fullname: string;
-		organization: string;
-		email: string;
-		role: string;
-		password: string;
-		confirm_password?: string;
-	}) {
+	async createNewUser(payload: Auth.RequestRegister) {
 		const { fullname, organization, email, role, password } = payload;
 		const user = await User.findOne({ email });
 		if (user && user.isActive) {
@@ -127,7 +121,7 @@ export class AuthService extends BaseService {
 		}
 	}
 
-	async checkValidLogin(payload: { username: string; password: string }) {
+	async checkValidLogin(payload: Auth.RequestLogin) {
 		const { username, password } = payload;
 		const userLogin = await User.findOne({
 			$or: [{ email: username }, { username: username }],

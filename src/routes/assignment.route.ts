@@ -49,17 +49,29 @@ router.post(
 	CatchAsync(assignmentController.initAssignment.bind(assignmentController))
 );
 
-router.get(
-	ROUTES.ASSIGNMENT_PARAM,
-	authJwt,
-	CatchAsync(assignmentController.findAssignment.bind(assignmentController))
-);
+router
+	.route(ROUTES.ASSIGNMENT_PARAM)
+	.get(
+		authJwt,
+		CatchAsync(assignmentController.findAssignment.bind(assignmentController))
+	)
+	.patch(
+		[authJwt, validateRequest],
+		CatchAsync(assignmentController.editAssignment.bind(assignmentController))
+	)
+	.delete(
+		[authJwt],
+		CatchAsync(
+			assignmentController.deleteAssignment.bind(assignmentController)
+		)
+	);
 
-router.patch(
-	ROUTES.ASSIGNMENT_PARAM,
-	authJwt,
-	validateRequest,
-	CatchAsync(assignmentController.editAssignment.bind(assignmentController))
+router.post(
+	ROUTES.ASSIGNMENT_PARAM_DUPLICATE,
+	[authJwt],
+	CatchAsync(
+		assignmentController.duplicateAssignment.bind(assignmentController)
+	)
 );
 
 export default router;
