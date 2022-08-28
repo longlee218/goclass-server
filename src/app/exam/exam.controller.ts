@@ -49,7 +49,8 @@ class ExamController {
 			const { assignmentData, listSlideData } =
 				await assignmentService.makeCopyAssignmentData(
 					roster.assignment,
-					req.user
+					req.user,
+					''
 				);
 			const assignStream = await AssignmentStream.create(assignmentData);
 			await SlideStream.create(listSlideData);
