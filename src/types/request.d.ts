@@ -40,13 +40,14 @@ declare namespace Auth {
 
 declare namespace Exam {
 	export interface RequestAddNewRosterGroup {
-		classRoomId: Types.ObjectId;
-		rosterGroupName: string;
-		studentIds: Array<Types.ObjectId>;
+		classRoom: Types.ObjectId;
+		name: string;
+		students: Array<Types.ObjectId>;
 		isShowResult: boolean;
 		isBlock: boolean;
 		isCanHelp: boolean;
-		isSuffer: boolean;
 		isHide: boolean;
+		isSuffer: boolean;
+		isFull: boolean;
 	}
 }

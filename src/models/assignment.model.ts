@@ -18,7 +18,7 @@ interface IAssignment extends SoftDeleteInterface {
 	desc?: string;
 	permissions: string[];
 	slideCounts: number;
-	rosters: Types.ObjectId;
+	roster: Types.ObjectId;
 	parentId: Types.ObjectId;
 	owner: Types.ObjectId;
 	belongs: Array<Types.ObjectId>;
@@ -51,7 +51,7 @@ const AssignmentSchema: Schema = new Schema(
 			type: Number,
 			default: 0,
 		},
-		rosters: {
+		roster: {
 			type: Schema.Types.ObjectId,
 			ref: 'rosters',
 		},

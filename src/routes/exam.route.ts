@@ -12,8 +12,13 @@ const router = express.Router();
 router
 	.route(ROUTES.EXAM_NEW_ROSTER_GROUP)
 	.post(
-		[authJwt, validId],
+		[authJwt, validId, validateRequest],
 		CatchAsync(examController.createRosterGroup.bind(examController))
 	);
-
+router
+	.route(ROUTES.ROSTER_GROUP_PARAM)
+	.patch(
+		[authJwt, validId, validateRequest],
+		CatchAsync(examController.updateRosterGroup.bind(examController))
+	);
 export default router;

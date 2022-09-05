@@ -4,10 +4,11 @@ import mongooseDelete, {
 	SoftDeleteModel,
 } from 'mongoose-delete';
 
-import { EnumStatusRoster } from '../config/enum';
+import { EnumStatusRosterGroup } from '../config/enum';
 
 interface IRosterGroup extends SoftDeleteDocument {
 	name: string;
+	classRoom: Types.ObjectId;
 	students: Array<Types.ObjectId>;
 	roster: Types.ObjectId;
 	isShowResult: boolean;
@@ -15,6 +16,7 @@ interface IRosterGroup extends SoftDeleteDocument {
 	isCanHelp: boolean;
 	isHide: boolean;
 	isSuffer: boolean;
+	isFull: boolean;
 	status: string;
 }
 
@@ -60,10 +62,14 @@ const RosterGroupSchema: Schema = new Schema({
 		type: Boolean,
 		default: false,
 	},
+	isFull: {
+		type: Boolean,
+		default: false,
+	},
 	status: {
 		type: String,
-		enum: EnumStatusRoster,
-		default: EnumStatusRoster.Online,
+		enum: EnumStatusRosterGroup,
+		default: EnumStatusRosterGroup.Ready,
 	},
 });
 

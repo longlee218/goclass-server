@@ -14,3 +14,8 @@ export enum EnumStatusRoster {
 	Online = 'online',
 	Offline = 'offline',
 }
+
+export enum EnumStatusRosterGroup {
+	Ready = 'ready',
+	Finished = 'finished',
+}

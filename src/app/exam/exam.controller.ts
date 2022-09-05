@@ -1,35 +1,43 @@
 import { ClassRoom, StudentClassRoom } from '../../models';
+import { EnumStatusRoster, EnumStatusRosterGroup } from '../../config/enum';
 import { NextFunction, Request, Response } from 'express';
 import {
 	STUDENT_ARE_IN_OTHER_GROUP,
 	_200,
 	_400,
+	_404,
 } from '../../config/message_code';
 
 import AssignmentStream from '../../models/assignment_stream.model';
-import { EnumStatusRoster } from '../../config/enum';
+import BaseController from '../../core/base.controller';
 import { Exam } from '../../types/request';
 import HttpError from '../../utils/HttpError';
+import HttpResponse from '../../utils/HttpResponse';
 import Roster from '../../models/roster.model';
 import RosterGroup from '../../models/roster_group.model';
 import SlideStream from '../../models/slides_stream.model';
+import { Types } from 'mongoose';
 import assignmentService from '../assignment/assignment.service';
+import examService from './exam.service';
 
-class ExamController {
-	async getAllRosterGroup() {}
+class ExamController extends BaseController {
+	async getRosterGroup(req: Request, res: Response, next: NextFunction) {
+		const rosterId = new Types.ObjectId(req.params.id);
+	}
 
 	async createRosterGroup(req: Request, res: Response, next: NextFunction) {
-		const rosterId = req.params.id;
+		const rosterId = new Types.ObjectId(req.params.id);
 		const roster = await Roster.findByIdOrFail(rosterId);
 		const {
-			classRoomId,
-			rosterGroupName,
+			classRoom,
+			name,
 			isShowResult,
-			studentIds,
+			students,
 			isBlock,
 			isCanHelp,
 			isSuffer,
 			isHide,
+			isFull,
 		} = req.body as Exam.RequestAddNewRosterGroup;
 
 		// Enter payload for roster group
@@ -53,45 +61,113 @@ class ExamController {
 					''
 				);
 			const assignStream = await AssignmentStream.create(assignmentData);
-			await SlideStream.create(listSlideData);
 			roster.assignmentStream = assignStream._id;
+			await SlideStream.create(listSlideData);
 			await roster.save();
 		}
 
 		// If dont't have roster group means all student in that class belong to OTHER GROUP
-		if (!rosterGroupName || rosterGroupName === 'null') {
-			const classRoom = await ClassRoom.findById(classRoomId);
-			rosterGroup.name = classRoom.name;
+		if (isFull) {
+			const classRoomDB = await ClassRoom.findById(classRoom);
+			rosterGroup.name = name || classRoomDB.name;
 			const studentsInClass = await StudentClassRoom.find({
 				isActive: true,
-				classRoom: classRoomId,
+				classRoom: classRoomDB._id,
 			}).select('student');
-			rosterGroup.students = studentsInClass.map(({ student }) => student);
+			const studentIdsFull = studentsInClass.map(({ student }) => student);
+			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
+				rosterId,
+				studentIdsFull
+			);
+			if (studentsInOtherGroup.length !== 0) {
+				throw new HttpError(
+					STUDENT_ARE_IN_OTHER_GROUP,
+					400,
+					'INVALID_ID_OF_STUDENT',
+					{
+						invalidStudents: studentsInOtherGroup,
+					}
+				);
+			}
+			rosterGroup.students = studentIdsFull;
 		} else {
-			rosterGroup.name = rosterGroupName;
-			rosterGroup.students = studentIds;
+			rosterGroup.name = name;
+			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
+				rosterId,
+				students
+			);
+			if (studentsInOtherGroup.length !== 0) {
+				throw new HttpError(
+					STUDENT_ARE_IN_OTHER_GROUP,
+					400,
+					'INVALID_ID_OF_STUDENT',
+					{
+						invalidStudents: studentsInOtherGroup,
+					}
+				);
+			}
+			rosterGroup.students = students;
 		}
+		await rosterGroup.save();
+		return new HttpResponse({ res, data: rosterGroup, statusCode: 201 });
 	}
 
-	async checkValidStudent(req: Request, res: Response, next: NextFunction) {
-		const { rosterId, studentId } = req.body;
-		const rosterGroups = await RosterGroup.find({
-			status: EnumStatusRoster.Online,
-			roster: rosterId,
-		});
-		const listStudents = rosterGroups.reduce((prev, current) => {
-			prev = [...prev, ...current.students];
-			return prev;
-		}, []);
-
-		if (listStudents.includes(studentId)) {
+	async updateRosterGroup(req: Request, res: Response, next: NextFunction) {
+		const rosterGroupId = req.params.id;
+		const payload = req.body as Exam.RequestAddNewRosterGroup;
+		const rosterGroup = await RosterGroup.findById(rosterGroupId).orFail(
+			() => new HttpError(_404, 404)
+		);
+		if (rosterGroup.status === EnumStatusRosterGroup.Finished) {
 			throw new HttpError(
-				STUDENT_ARE_IN_OTHER_GROUP,
-				400,
-				'INVALID_STUDENT_ID'
+				'Nhóm này đã hoàn thành, không thể chỉnh sửa được.'
 			);
 		}
-		return res.status(200).send(_200);
+		// Update student in Roster Group
+		if (payload.isFull) {
+			const classRoom = await ClassRoom.findById(payload.classRoom);
+			const studentsInClass = await StudentClassRoom.find({
+				isActive: true,
+				classRoom: classRoom._id,
+			}).select('student');
+			const studentIdsFull = studentsInClass.map(({ student }) => student);
+			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
+				rosterGroup.roster,
+				studentIdsFull
+			);
+			if (studentsInOtherGroup.length !== 0) {
+				throw new HttpError(
+					STUDENT_ARE_IN_OTHER_GROUP,
+					400,
+					'INVALID_ID_OF_STUDENT',
+					{
+						invalidStudents: studentsInOtherGroup,
+					}
+				);
+			}
+			payload.students = studentIdsFull;
+		} else if (
+			typeof payload.isFull === 'boolean' &&
+			payload.isFull === false
+		) {
+			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
+				rosterGroup.roster,
+				payload.students
+			);
+			if (studentsInOtherGroup.length !== 0) {
+				throw new HttpError(
+					STUDENT_ARE_IN_OTHER_GROUP,
+					400,
+					'INVALID_ID_OF_STUDENT',
+					{
+						invalidStudents: studentsInOtherGroup,
+					}
+				);
+			}
+			payload.students = payload.students;
+		}
+		await rosterGroup.updateOne(payload);
+		return new HttpResponse({ res, data: rosterGroup, statusCode: 200 });
 	}
 }
 
