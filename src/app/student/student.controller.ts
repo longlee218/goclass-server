@@ -43,6 +43,15 @@ class StudentController {
 		return new HttpResponse({ res, data: results });
 	}
 
+	async getAllStudentOfClass(req: Request, res: Response, next: NextFunction) {
+		const classId = req.params.classId as string;
+		const results = await studentService.getAllStudentsOfClass(
+			classId,
+			req.query
+		);
+		return new HttpResponse({ res, data: results });
+	}
+
 	async deleteStudent(req: Request, res: Response, next: NextFunction) {
 		const idRecord = req.params.id;
 		const classId = req.params.classId;

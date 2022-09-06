@@ -11,20 +11,23 @@ const router = express.Router();
 router
 	.route(ROUTES.STUDENT_OF_CLASS)
 	.get(
-		authJwt,
-		validateRequest,
+		[authJwt, validateRequest],
 		CatchAsync(studentController.getStudentOfClass.bind(studentController))
 	)
 	.post(
-		authJwt,
-		validateRequest,
+		[authJwt, validateRequest],
 		CatchAsync(studentController.addNewStudent.bind(studentController))
 	)
 	.put(
-		authJwt,
-		validateRequest,
+		[authJwt, validateRequest],
 		CatchAsync(studentController.editStudent.bind(studentController))
 	);
+
+router.get(
+	ROUTES.STUDENT_OF_CLASS + '/all',
+	[authJwt],
+	CatchAsync(studentController.getAllStudentOfClass.bind(studentController))
+);
 
 router.delete(
 	ROUTES.STUDENT_OF_CLASS_PARAM,

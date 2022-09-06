@@ -1,5 +1,5 @@
 import BaseService from '../../core/base.service';
-import { EnumStatusRoster } from '../../config/enum';
+import { EnumStatusRosterGroup } from '../../config/enum';
 import RosterGroup from '../../models/roster_group.model';
 import { Types } from 'mongoose';
 
@@ -9,7 +9,7 @@ class ExamService extends BaseService {
 		studentIds: Array<Types.ObjectId>
 	): Promise<Array<Types.ObjectId>> {
 		const rosterGroups = await RosterGroup.find({
-			status: EnumStatusRoster.Online,
+			status: EnumStatusRosterGroup.Ready,
 			roster: rosterId,
 		});
 		const listStudents: Array<Types.ObjectId> = rosterGroups.reduce(
@@ -19,8 +19,11 @@ class ExamService extends BaseService {
 			},
 			[]
 		);
-		return listStudents.filter((alreadyId) =>
-			studentIds.filter((studentId) => studentId.equals(alreadyId))
+		return listStudents.filter(
+			(alreadyId) =>
+				studentIds.filter(
+					(studentId) => alreadyId.toString() === studentId.toString()
+				).length
 		);
 	}
 }

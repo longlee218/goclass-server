@@ -23,6 +23,31 @@ import examService from './exam.service';
 class ExamController extends BaseController {
 	async getRosterGroup(req: Request, res: Response, next: NextFunction) {
 		const rosterId = new Types.ObjectId(req.params.id);
+		const rosterGroups = await RosterGroup.find({ roster: rosterId }).sort(
+			'-createdAt'
+		);
+		const mapping = new Map();
+		const today = new Date().toLocaleDateString();
+		rosterGroups.forEach((rosterGroup) => {
+			const createdAt = new Date(rosterGroup.createdAt).toLocaleDateString();
+			const key = today === createdAt ? 'Hôm nay' : createdAt;
+			if (!mapping.has(key)) {
+				mapping.set(key, []);
+			}
+			mapping.get(key).push(rosterGroup.toJSON());
+		});
+		const results = [];
+		for (const [key, value] of mapping) {
+			results.push({
+				date: key,
+				items: value,
+			});
+		}
+		return new HttpResponse({
+			res,
+			data: results,
+			statusCode: 201,
+		});
 	}
 
 	async createRosterGroup(req: Request, res: Response, next: NextFunction) {
@@ -43,7 +68,7 @@ class ExamController extends BaseController {
 		// Enter payload for roster group
 		const rosterGroup = new RosterGroup();
 		rosterGroup.roster = roster._id;
-		rosterGroup.status = EnumStatusRoster.Online;
+		rosterGroup.status = EnumStatusRosterGroup.Ready;
 		rosterGroup.isShowResult = isShowResult;
 		rosterGroup.isBlock = isBlock;
 		rosterGroup.isCanHelp = isCanHelp;
@@ -70,15 +95,19 @@ class ExamController extends BaseController {
 		if (isFull) {
 			const classRoomDB = await ClassRoom.findById(classRoom);
 			rosterGroup.name = name || classRoomDB.name;
+
+			// Get all student active in a classroom
 			const studentsInClass = await StudentClassRoom.find({
 				isActive: true,
 				classRoom: classRoomDB._id,
 			}).select('student');
 			const studentIdsFull = studentsInClass.map(({ student }) => student);
+
 			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
 				rosterId,
 				studentIdsFull
 			);
+
 			if (studentsInOtherGroup.length !== 0) {
 				throw new HttpError(
 					STUDENT_ARE_IN_OTHER_GROUP,

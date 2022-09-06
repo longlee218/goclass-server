@@ -149,6 +149,10 @@ export class StudentService {
 		);
 	}
 
+	async getAllStudentsOfClass(classRoom: string | Types.ObjectId, query: any) {
+		return await StudentClassRoom.find({ classRoom, ...query });
+	}
+
 	async checkHasStudent() {}
 }
 

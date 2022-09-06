@@ -11,6 +11,10 @@ const router = express.Router();
 
 router
 	.route(ROUTES.EXAM_NEW_ROSTER_GROUP)
+	.get(
+		[authJwt, validId],
+		CatchAsync(examController.getRosterGroup.bind(examController))
+	)
 	.post(
 		[authJwt, validId, validateRequest],
 		CatchAsync(examController.createRosterGroup.bind(examController))

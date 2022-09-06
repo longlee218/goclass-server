@@ -18,6 +18,8 @@ interface IRosterGroup extends SoftDeleteDocument {
 	isSuffer: boolean;
 	isFull: boolean;
 	status: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface IRosterGroupDocument
@@ -26,52 +28,57 @@ export interface IRosterGroupDocument
 export interface IRosterGroupModel
 	extends SoftDeleteModel<IRosterGroupDocument> {}
 
-const RosterGroupSchema: Schema = new Schema({
-	name: String,
-	classRoom: {
-		type: Schema.Types.ObjectId,
-		ref: 'class_rooms',
-	},
-	students: [
-		{
+const RosterGroupSchema: Schema = new Schema(
+	{
+		name: String,
+		classRoom: {
 			type: Schema.Types.ObjectId,
-			ref: 'users',
+			ref: 'class_rooms',
 		},
-	],
-	roster: {
-		type: Schema.Types.ObjectId,
-		ref: 'rosters',
+		students: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'users',
+			},
+		],
+		roster: {
+			type: Schema.Types.ObjectId,
+			ref: 'rosters',
+		},
+		isShowResult: {
+			type: Boolean,
+			default: true,
+		},
+		isBlock: {
+			type: Boolean,
+			default: false,
+		},
+		isCanHelp: {
+			type: Boolean,
+			default: false,
+		},
+		isHide: {
+			type: Boolean,
+			default: false,
+		},
+		isSuffer: {
+			type: Boolean,
+			default: false,
+		},
+		isFull: {
+			type: Boolean,
+			default: false,
+		},
+		status: {
+			type: String,
+			enum: EnumStatusRosterGroup,
+			default: EnumStatusRosterGroup.Ready,
+		},
 	},
-	isShowResult: {
-		type: Boolean,
-		default: true,
-	},
-	isBlock: {
-		type: Boolean,
-		default: false,
-	},
-	isCanHelp: {
-		type: Boolean,
-		default: false,
-	},
-	isHide: {
-		type: Boolean,
-		default: false,
-	},
-	isSuffer: {
-		type: Boolean,
-		default: false,
-	},
-	isFull: {
-		type: Boolean,
-		default: false,
-	},
-	status: {
-		type: String,
-		enum: EnumStatusRosterGroup,
-		default: EnumStatusRosterGroup.Ready,
-	},
-});
+	{
+		timestamps: true,
+	}
+);
 
 RosterGroupSchema.plugin(mongooseDelete, {
 	deletedAt: true,
