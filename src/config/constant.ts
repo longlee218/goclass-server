@@ -36,7 +36,7 @@ export const ROUTES = {
 	STUDENT_OF_CLASS_PARAM: '/students-class:classId/:id',
 
 	EXAM_NEW_ROSTER_GROUP: '/exam/roster/:id/roster-group',
-	ROSTER_GROUP_PARAM: 'exam/roster-group/:id',
+	ROSTER_GROUP_PARAM: '/exam/roster-group/:id',
 
 	ORGANIZATION: '/organization',
 	EMAIL: '/email',

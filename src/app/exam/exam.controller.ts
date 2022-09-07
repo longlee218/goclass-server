@@ -52,6 +52,7 @@ class ExamController extends BaseController {
 
 	async createRosterGroup(req: Request, res: Response, next: NextFunction) {
 		const rosterId = new Types.ObjectId(req.params.id);
+		console.log(req.body);
 		const roster = await Roster.findByIdOrFail(rosterId);
 		const {
 			classRoom,
@@ -70,10 +71,10 @@ class ExamController extends BaseController {
 		rosterGroup.roster = roster._id;
 		rosterGroup.status = EnumStatusRosterGroup.Ready;
 		rosterGroup.isShowResult = isShowResult;
-		rosterGroup.isBlock = isBlock;
-		rosterGroup.isCanHelp = isCanHelp;
-		rosterGroup.isHide = isHide;
-		rosterGroup.isSuffer = isSuffer;
+		rosterGroup.isBlock = isBlock ?? false;
+		rosterGroup.isCanHelp = isCanHelp ?? false;
+		rosterGroup.isHide = isHide ?? true;
+		rosterGroup.isSuffer = isSuffer ?? false;
 
 		// If roster is Offline then make it Online
 		if (roster.status === EnumStatusRoster.Offline) {
@@ -94,7 +95,7 @@ class ExamController extends BaseController {
 		// If dont't have roster group means all student in that class belong to OTHER GROUP
 		if (isFull) {
 			const classRoomDB = await ClassRoom.findById(classRoom);
-			rosterGroup.name = name || classRoomDB.name;
+			rosterGroup.name = name ?? classRoomDB.name;
 
 			// Get all student active in a classroom
 			const studentsInClass = await StudentClassRoom.find({
