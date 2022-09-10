@@ -13,6 +13,7 @@ interface IRoster extends SoftDeleteDocument {
 	status: string;
 	assignment: Types.ObjectId;
 	assignmentStream: Types.ObjectId;
+	assignmentPublics: Array<Types.ObjectId>;
 	startAt: Date;
 	endAt: Date;
 }
@@ -38,6 +39,12 @@ const RosterSchema: Schema = new Schema(
 			type: Schema.Types.ObjectId,
 			ref: 'assignment_streams',
 		},
+		assignmentPublics: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'assignment_streams',
+			},
+		],
 		startAt: Date,
 		endAt: Date,
 	},

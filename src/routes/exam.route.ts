@@ -25,4 +25,10 @@ router
 		[authJwt, validId, validateRequest],
 		CatchAsync(examController.updateRosterGroup.bind(examController))
 	);
+
+router.get(
+	ROUTES.EXAM_ANALYZE,
+	[authJwt],
+	CatchAsync(examController.getExamForStudent.bind(examController))
+);
 export default router;

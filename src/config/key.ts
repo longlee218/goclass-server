@@ -6,7 +6,9 @@ dotenv.config({
 });
 
 export const PREFIX_API_V1 = '/api/v1';
-export const CLIENT_HOST = process.env.CLIENT_HOST;
+export const CLIENT_HOST = process.env.CLIENT_HOST || 'http://localhost:3001'; // host client main;
+export const CLIENT_HOST_EDITOR =
+	process.env.CLIENT_HOST_EDITOR || 'http://localhost:3000'; // host client excalidraw
 
 export const DB_HOST = process.env.DB_HOST;
 export const DB_USER = process.env.DB_USER;

@@ -38,6 +38,8 @@ export const ROUTES = {
 	EXAM_NEW_ROSTER_GROUP: '/exam/roster/:id/roster-group',
 	ROSTER_GROUP_PARAM: '/exam/roster-group/:id',
 
+	EXAM_ANALYZE: '/exam/analyze',
+
 	ORGANIZATION: '/organization',
 	EMAIL: '/email',
 	EMAIL_EXIST: '/email-exist',

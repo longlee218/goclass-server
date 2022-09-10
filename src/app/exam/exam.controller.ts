@@ -51,8 +51,8 @@ class ExamController extends BaseController {
 	}
 
 	async createRosterGroup(req: Request, res: Response, next: NextFunction) {
+		const user = req.user;
 		const rosterId = new Types.ObjectId(req.params.id);
-		console.log(req.body);
 		const roster = await Roster.findByIdOrFail(rosterId);
 		const {
 			classRoom,
@@ -70,6 +70,8 @@ class ExamController extends BaseController {
 		const rosterGroup = new RosterGroup();
 		rosterGroup.roster = roster._id;
 		rosterGroup.status = EnumStatusRosterGroup.Ready;
+		rosterGroup.owner = user._id;
+		rosterGroup.classRoom = classRoom;
 		rosterGroup.isShowResult = isShowResult;
 		rosterGroup.isBlock = isBlock ?? false;
 		rosterGroup.isCanHelp = isCanHelp ?? false;
@@ -88,6 +90,10 @@ class ExamController extends BaseController {
 				);
 			const assignStream = await AssignmentStream.create(assignmentData);
 			roster.assignmentStream = assignStream._id;
+			roster.assignmentPublics = [
+				...(roster.assignmentPublics ?? []),
+				assignStream._id,
+			];
 			await SlideStream.create(listSlideData);
 			await roster.save();
 		}
@@ -102,23 +108,23 @@ class ExamController extends BaseController {
 				isActive: true,
 				classRoom: classRoomDB._id,
 			}).select('student');
-			const studentIdsFull = studentsInClass.map(({ student }) => student);
+			const studentIdsFull = studentsInClass.map(({ _id }) => _id);
 
 			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
 				rosterId,
 				studentIdsFull
 			);
 
-			if (studentsInOtherGroup.length !== 0) {
-				throw new HttpError(
-					STUDENT_ARE_IN_OTHER_GROUP,
-					400,
-					'INVALID_ID_OF_STUDENT',
-					{
-						invalidStudents: studentsInOtherGroup,
-					}
-				);
-			}
+			// if (studentsInOtherGroup.length !== 0) {
+			// 	throw new HttpError(
+			// 		STUDENT_ARE_IN_OTHER_GROUP,
+			// 		400,
+			// 		'INVALID_ID_OF_STUDENT',
+			// 		{
+			// 			invalidStudents: studentsInOtherGroup,
+			// 		}
+			// 	);
+			// }
 			rosterGroup.students = studentIdsFull;
 		} else {
 			rosterGroup.name = name;
@@ -126,16 +132,16 @@ class ExamController extends BaseController {
 				rosterId,
 				students
 			);
-			if (studentsInOtherGroup.length !== 0) {
-				throw new HttpError(
-					STUDENT_ARE_IN_OTHER_GROUP,
-					400,
-					'INVALID_ID_OF_STUDENT',
-					{
-						invalidStudents: studentsInOtherGroup,
-					}
-				);
-			}
+			// if (studentsInOtherGroup.length !== 0) {
+			// 	throw new HttpError(
+			// 		STUDENT_ARE_IN_OTHER_GROUP,
+			// 		400,
+			// 		'INVALID_ID_OF_STUDENT',
+			// 		{
+			// 			invalidStudents: studentsInOtherGroup,
+			// 		}
+			// 	);
+			// }
 			rosterGroup.students = students;
 		}
 		await rosterGroup.save();
@@ -143,7 +149,7 @@ class ExamController extends BaseController {
 	}
 
 	async updateRosterGroup(req: Request, res: Response, next: NextFunction) {
-		const rosterGroupId = req.params.id;
+		const rosterGroupId = req.params.id as string;
 		const payload = req.body as Exam.RequestAddNewRosterGroup;
 		const rosterGroup = await RosterGroup.findById(rosterGroupId).orFail(
 			() => new HttpError(_404, 404)
@@ -165,16 +171,16 @@ class ExamController extends BaseController {
 				rosterGroup.roster,
 				studentIdsFull
 			);
-			if (studentsInOtherGroup.length !== 0) {
-				throw new HttpError(
-					STUDENT_ARE_IN_OTHER_GROUP,
-					400,
-					'INVALID_ID_OF_STUDENT',
-					{
-						invalidStudents: studentsInOtherGroup,
-					}
-				);
-			}
+			// if (studentsInOtherGroup.length !== 0) {
+			// 	throw new HttpError(
+			// 		STUDENT_ARE_IN_OTHER_GROUP,
+			// 		400,
+			// 		'INVALID_ID_OF_STUDENT',
+			// 		{
+			// 			invalidStudents: studentsInOtherGroup,
+			// 		}
+			// 	);
+			// }
 			payload.students = studentIdsFull;
 		} else if (
 			typeof payload.isFull === 'boolean' &&
@@ -184,20 +190,45 @@ class ExamController extends BaseController {
 				rosterGroup.roster,
 				payload.students
 			);
-			if (studentsInOtherGroup.length !== 0) {
-				throw new HttpError(
-					STUDENT_ARE_IN_OTHER_GROUP,
-					400,
-					'INVALID_ID_OF_STUDENT',
-					{
-						invalidStudents: studentsInOtherGroup,
-					}
-				);
-			}
+			// if (studentsInOtherGroup.length !== 0) {
+			// 	throw new HttpError(
+			// 		STUDENT_ARE_IN_OTHER_GROUP,
+			// 		400,
+			// 		'INVALID_ID_OF_STUDENT',
+			// 		{
+			// 			invalidStudents: studentsInOtherGroup,
+			// 		}
+			// 	);
+			// }
 			payload.students = payload.students;
 		}
 		await rosterGroup.updateOne(payload);
 		return new HttpResponse({ res, data: rosterGroup, statusCode: 200 });
+	}
+
+	async getExamForStudent(req: Request, res: Response, next: NextFunction) {
+		const { user, query } = req;
+		const belongClassRooms = await StudentClassRoom.find({
+			isActive: true,
+			student: user._id,
+		}).select('_id');
+		const type = query.type;
+		switch (type) {
+			case 'todo':
+				const mystudentsId = belongClassRooms.map(({ _id }) => _id);
+				const todoExams = await examService.getToDoExam(mystudentsId);
+				return new HttpResponse({ res, data: todoExams });
+			case 'finish':
+				// const mystudentsId = belongClassRooms.map(({ _id }) => _id);
+				// const todoExams = await examService.getToDoExam(mystudentsId);
+				return new HttpResponse({ res, data: todoExams });
+			default:
+				throw new HttpError(
+					'Invalid query type: ' + query.type,
+					400,
+					'BAD_QUERY'
+				);
+		}
 	}
 }
 

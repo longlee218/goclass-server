@@ -26,6 +26,136 @@ class ExamService extends BaseService {
 				).length
 		);
 	}
+
+	async getToDoExam(studentIds: string[]) {
+		const groups = await RosterGroup.aggregate([
+			{
+				$match: {
+					students: { $elemMatch: { $in: studentIds } },
+					$or: [
+						{
+							status: EnumStatusRosterGroup.Ready,
+						},
+						{
+							status: EnumStatusRosterGroup.Online,
+						},
+					],
+				},
+			},
+			{
+				$lookup: {
+					from: 'rosters',
+					let: {
+						localField: '$roster',
+					},
+					pipeline: [
+						{
+							$match: {
+								$expr: { $eq: ['$$localField', '$_id'] },
+							},
+						},
+						{
+							$limit: 1,
+						},
+					],
+					as: 'roster',
+				},
+			},
+			{
+				$unwind: {
+					path: '$roster',
+					preserveNullAndEmptyArrays: false,
+				},
+			},
+			{
+				$lookup: {
+					from: 'assignment_streams',
+					let: {
+						localField: '$roster.assignmentStream',
+					},
+					pipeline: [
+						{
+							$match: {
+								$expr: { $eq: ['$$localField', '$_id'] },
+							},
+						},
+						{
+							$sort: {
+								createdAt: -1,
+							},
+						},
+					],
+					as: 'assignmentStream',
+				},
+			},
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'owner',
+					foreignField: '_id',
+					as: 'owner',
+				},
+			},
+			{
+				$unwind: {
+					path: '$owner',
+					preserveNullAndEmptyArrays: false,
+				},
+			},
+			{
+				$lookup: {
+					from: 'class_rooms',
+					localField: 'classRoom',
+					foreignField: '_id',
+					as: 'classRoom',
+				},
+			},
+			{
+				$unwind: {
+					path: '$classRoom',
+					preserveNullAndEmptyArrays: false,
+				},
+			},
+			{
+				$group: {
+					_id: '$classRoom._id',
+					rosterGroups: {
+						$push: {
+							_id: '$_id',
+							name: '$name',
+							isBlock: '$isBlock',
+							isCanHelp: '$isCanHelp',
+							isHide: '$isHide',
+							isSuffer: '$isSuffer',
+							isFull: '$isFull',
+							isShowResult: '$isShowResult',
+							status: '$status',
+							assignment: { $first: '$assignmentStream' },
+							createdAt: '$createdAt',
+							updatedAt: '$updatedAt',
+						},
+					},
+					owner: { $first: '$owner' },
+					roster: { $first: '$roster' },
+					classRoom: { $first: '$classRoom' },
+				},
+			},
+			{
+				$project: {
+					_id: 1,
+					rosterGroups: 1,
+					'owner._id': 1,
+					'owner.fullname': 1,
+					'owner.email': 1,
+					'owner.roles': 1,
+					'owner.lastLogin': 1,
+					'classRoom._id': 1,
+					'classRoom.name': 1,
+				},
+			},
+		]);
+		return groups;
+	}
 }
 
 export default new ExamService();

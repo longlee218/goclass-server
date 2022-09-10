@@ -8,7 +8,7 @@ function SocketServer(httpServer: http.Server) {
 		path: '/socket',
 		cors: {
 			credentials: true,
-			origin: ['http://localhost:3000', 'https://admin.socket.io'],
+			origin: ['http://localhost:3001', 'https://admin.socket.io'],
 		},
 	});
 	io.on('connection', (socket) => {

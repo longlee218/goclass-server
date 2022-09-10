@@ -18,6 +18,7 @@ interface IRosterGroup extends SoftDeleteDocument {
 	isSuffer: boolean;
 	isFull: boolean;
 	status: string;
+	owner: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -73,6 +74,10 @@ const RosterGroupSchema: Schema = new Schema(
 			type: String,
 			enum: EnumStatusRosterGroup,
 			default: EnumStatusRosterGroup.Ready,
+		},
+		owner: {
+			type: Schema.Types.ObjectId,
+			ref: 'users',
 		},
 	},
 	{
