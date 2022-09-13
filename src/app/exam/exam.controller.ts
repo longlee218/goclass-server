@@ -77,6 +77,7 @@ class ExamController extends BaseController {
 		rosterGroup.isCanHelp = isCanHelp ?? false;
 		rosterGroup.isHide = isHide ?? true;
 		rosterGroup.isSuffer = isSuffer ?? false;
+		rosterGroup.isFull = isFull ?? false;
 
 		// If roster is Offline then make it Online
 		if (roster.status === EnumStatusRoster.Offline) {
@@ -167,10 +168,10 @@ class ExamController extends BaseController {
 				classRoom: classRoom._id,
 			}).select('student');
 			const studentIdsFull = studentsInClass.map(({ student }) => student);
-			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
-				rosterGroup.roster,
-				studentIdsFull
-			);
+			// const studentsInOtherGroup = await examService.findStudentInOtherGroup(
+			// 	rosterGroup.roster,
+			// 	studentIdsFull
+			// );
 			// if (studentsInOtherGroup.length !== 0) {
 			// 	throw new HttpError(
 			// 		STUDENT_ARE_IN_OTHER_GROUP,
@@ -186,10 +187,10 @@ class ExamController extends BaseController {
 			typeof payload.isFull === 'boolean' &&
 			payload.isFull === false
 		) {
-			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
-				rosterGroup.roster,
-				payload.students
-			);
+			// const studentsInOtherGroup = await examService.findStudentInOtherGroup(
+			// 	rosterGroup.roster,
+			// 	payload.students
+			// );
 			// if (studentsInOtherGroup.length !== 0) {
 			// 	throw new HttpError(
 			// 		STUDENT_ARE_IN_OTHER_GROUP,
@@ -203,7 +204,51 @@ class ExamController extends BaseController {
 			payload.students = payload.students;
 		}
 		await rosterGroup.updateOne(payload);
+		const rosterGroups = await RosterGroup.find({
+			roster: rosterGroup.roster,
+			status: {
+				$in: [EnumStatusRosterGroup.Ready, EnumStatusRosterGroup.Online],
+			},
+		});
+		// If length == 0 means all of these are Finished
+		if (rosterGroups.length === 0) {
+			await Roster.findByIdAndUpdate(rosterGroup.roster, {
+				status: EnumStatusRoster.Offline,
+			});
+		}
+
 		return new HttpResponse({ res, data: rosterGroup, statusCode: 200 });
+	}
+
+	async deleteRosterGroup(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id;
+		const query = req.query;
+		const { mode } = query;
+		const rosterGroup = await RosterGroup.findById(id);
+		if (mode === 'safe') {
+			if (rosterGroup.status === EnumStatusRosterGroup.Online) {
+				throw new HttpError(
+					'Nhóm này đang online, bạn phải `Kết thúc` trước khi xóa.'
+				);
+			}
+			await rosterGroup.delete();
+		} else {
+			const rosterGroup = await RosterGroup.findById(id);
+			await RosterGroup.deleteById(id);
+		}
+		const rosterGroups = await RosterGroup.find({
+			roster: rosterGroup.roster,
+			status: {
+				$in: [EnumStatusRosterGroup.Ready, EnumStatusRosterGroup.Online],
+			},
+		});
+		// If length == 0 means all of these are Finished or don't have any
+		if (rosterGroups.length === 0) {
+			await Roster.findByIdAndUpdate(rosterGroup.roster, {
+				status: EnumStatusRoster.Offline,
+			});
+		}
+		return res.sendStatus(204);
 	}
 
 	async getExamForStudent(req: Request, res: Response, next: NextFunction) {

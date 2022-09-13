@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { AssignmentFolder } from '../../models';
 import BaseController from '../../core/base.controller';
 import HttpResponse from '../../utils/HttpResponse';
+import Roster from '../../models/roster.model';
 import { Types } from 'mongoose';
 import assignmentService from './assignment.service';
 
@@ -66,8 +67,10 @@ export class AssignmentController extends BaseController {
 
 	async editAssignment(req: Request, res: Response, next: NextFunction) {
 		const id = String(req.params.id);
-		await assignmentService.updateById(req.body, id);
 		const assignment = await assignmentService.findAssignmentById(id);
+		// const roster = await Roster.findById(assignment.roster);
+
+		await assignmentService.updateById(req.body, id);
 		return new HttpResponse({ res, data: assignment });
 	}
 

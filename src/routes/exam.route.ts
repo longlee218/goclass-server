@@ -24,6 +24,10 @@ router
 	.patch(
 		[authJwt, validId, validateRequest],
 		CatchAsync(examController.updateRosterGroup.bind(examController))
+	)
+	.delete(
+		[authJwt, validId],
+		CatchAsync(examController.deleteRosterGroup.bind(examController))
 	);
 
 router.get(
