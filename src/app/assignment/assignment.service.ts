@@ -200,6 +200,11 @@ export class AssignmentService {
 		};
 		return { listSlideData, assignmentData };
 	}
+
+	async getSharedAssignments() {
+		const results = await Assignment.find({ access: 'shared' });
+		return results;
+	}
 }
 
 export default new AssignmentService();

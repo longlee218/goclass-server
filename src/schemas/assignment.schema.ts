@@ -13,5 +13,6 @@ export default {
 		desc: Joi.string().empty().allow(''),
 		subjects: Joi.array().items(Joi.string()).allow(null).empty(),
 		grades: Joi.array().items(Joi.string()).allow(null).empty(),
+		access: Joi.string().empty(),
 	}),
 };

@@ -66,6 +66,14 @@ router
 		)
 	);
 
+router.get(
+	ROUTES.ASSIGNMENTS,
+	[authJwt],
+	CatchAsync(
+		assignmentController.getSharedAssignments.bind(assignmentController)
+	)
+);
+
 router.post(
 	ROUTES.ASSIGNMENT_PARAM_DUPLICATE,
 	[authJwt],

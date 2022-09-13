@@ -59,6 +59,12 @@ export class AssignmentController extends BaseController {
 		return new HttpResponse({ res, data: assignment });
 	}
 
+	async getSharedAssignments(req: Request, res: Response, next: NextFunction) {
+		const { query } = req;
+		const assignments = await assignmentService.getSharedAssignments();
+		return new HttpResponse({ res, data: assignments });
+	}
+
 	async findAssignment(req: Request, res: Response, next: NextFunction) {
 		const id = String(req.params.id);
 		const assignment = await assignmentService.findAssignmentById(id);
@@ -67,10 +73,8 @@ export class AssignmentController extends BaseController {
 
 	async editAssignment(req: Request, res: Response, next: NextFunction) {
 		const id = String(req.params.id);
-		const assignment = await assignmentService.findAssignmentById(id);
+		const assignment = await assignmentService.updateById(req.body, id);
 		// const roster = await Roster.findById(assignment.roster);
-
-		await assignmentService.updateById(req.body, id);
 		return new HttpResponse({ res, data: assignment });
 	}
 
