@@ -83,19 +83,19 @@ class ExamController extends BaseController {
 		if (roster.status === EnumStatusRoster.Offline) {
 			roster.status = EnumStatusRoster.Online;
 			// Make assign_stream and slide_stream depended on assignId
-			const { assignmentData, listSlideData } =
-				await assignmentService.makeCopyAssignmentData(
-					roster.assignment,
-					req.user,
-					''
-				);
-			const assignStream = await AssignmentStream.create(assignmentData);
-			roster.assignmentStream = assignStream._id;
-			roster.assignmentPublics = [
-				...(roster.assignmentPublics ?? []),
-				assignStream._id,
-			];
-			await SlideStream.create(listSlideData);
+			// const { assignmentData, listSlideData } =
+			// 	await assignmentService.makeCopyAssignmentData(
+			// 		roster.assignment,
+			// 		req.user,
+			// 		''
+			// 	);
+			// const assignStream = await AssignmentStream.create(assignmentData);
+			// roster.assignmentStream = assignStream._id;
+			// roster.assignmentPublics = [
+			// 	...(roster.assignmentPublics ?? []),
+			// 	assignStream._id,
+			// ];
+			// await SlideStream.create(listSlideData);
 			await roster.save();
 		}
 

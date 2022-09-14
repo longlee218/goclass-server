@@ -52,6 +52,10 @@ const AssignmentStreamSchema: Schema = new Schema(
 				ref: 'slide_streams',
 			},
 		],
+		downloads: {
+			type: Number,
+			default: 0,
+		},
 	},
 	{
 		timestamps: true,
@@ -78,7 +82,12 @@ AssignmentStreamSchema.plugin(mongooseDelete, {
 	deletedAt: true,
 	overrideMethods: true,
 });
-
+AssignmentStreamSchema.virtual('firstSlide', {
+	ref: 'slide_streams',
+	localField: 'slides',
+	foreignField: '_id',
+	justOne: true,
+});
 const AssignmentStream = model<IAssignmentStreamDocument, IAssignmentModel>(
 	'assignment_streams',
 	AssignmentStreamSchema

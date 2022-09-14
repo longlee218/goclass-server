@@ -4,6 +4,7 @@ import assignmentController from '../app/assignment/assignment.controller';
 import authJwt from '../middlewares/authJwt';
 import express from 'express';
 import schemaValidate from '../middlewares/schemaValidate';
+import validId from '../middlewares/validId';
 
 const validateRequest = schemaValidate(true);
 const router = express.Router();
@@ -71,6 +72,14 @@ router.get(
 	[authJwt],
 	CatchAsync(
 		assignmentController.getSharedAssignments.bind(assignmentController)
+	)
+);
+
+router.get(
+	ROUTES.ASSIGNMENT_PARAM_SHARED,
+	[authJwt, validId],
+	CatchAsync(
+		assignmentController.findSharedAssignment.bind(assignmentController)
 	)
 );
 

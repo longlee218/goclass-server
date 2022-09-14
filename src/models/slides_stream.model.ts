@@ -13,6 +13,7 @@ interface ISlideStream extends SoftDeleteInterface {
 	points: number;
 	desc: string;
 	thumbnail: string;
+	slide: Types.ObjectId;
 	assignment: Types.ObjectId;
 }
 
@@ -39,6 +40,10 @@ const SlideStreamSchema: Schema = new Schema(
 		assignment: {
 			type: Schema.Types.ObjectId,
 			ref: 'assignment_streams',
+		},
+		slide: {
+			type: Schema.Types.ObjectId,
+			ref: 'slides',
 		},
 	},
 	{

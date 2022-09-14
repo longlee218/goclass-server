@@ -67,11 +67,32 @@ class ExamService extends BaseService {
 					preserveNullAndEmptyArrays: false,
 				},
 			},
+			// {
+			// 	$lookup: {
+			// 		from: 'assignment_streams',
+			// 		let: {
+			// 			localField: '$roster.assignmentStream',
+			// 		},
+			// 		pipeline: [
+			// 			{
+			// 				$match: {
+			// 					$expr: { $eq: ['$$localField', '$_id'] },
+			// 				},
+			// 			},
+			// 			{
+			// 				$sort: {
+			// 					createdAt: -1,
+			// 				},
+			// 			},
+			// 		],
+			// 		as: 'assignmentStream',
+			// 	},
+			// },
 			{
 				$lookup: {
-					from: 'assignment_streams',
+					from: 'assignments',
 					let: {
-						localField: '$roster.assignmentStream',
+						localField: '$roster.assignment',
 					},
 					pipeline: [
 						{
@@ -85,7 +106,7 @@ class ExamService extends BaseService {
 							},
 						},
 					],
-					as: 'assignmentStream',
+					as: 'assignment',
 				},
 			},
 			{
@@ -130,7 +151,7 @@ class ExamService extends BaseService {
 							isFull: '$isFull',
 							isShowResult: '$isShowResult',
 							status: '$status',
-							assignment: { $first: '$assignmentStream' },
+							assignment: { $first: '$assignment' },
 							createdAt: '$createdAt',
 							updatedAt: '$updatedAt',
 						},

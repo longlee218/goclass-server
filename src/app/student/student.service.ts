@@ -88,7 +88,6 @@ export class StudentService {
 	}
 
 	makeQuery(payload: any) {
-		console.log(payload);
 		const query: any = {};
 		Object.keys(payload).forEach((key) => {
 			const value = payload[key];

@@ -1,13 +1,16 @@
 import Assignment, { IAssignmentDocument } from '../../models/assignment.model';
 
 import { AssignmentFolder } from '../../models';
+import AssignmentStream from '../../models/assignment_stream.model';
+import BaseService from '../../core/base.service';
 import { EnumStatusRoster } from '../../config/enum';
 import { IUserDocument } from '../../models/user.model';
 import Roster from '../../models/roster.model';
 import Slide from '../../models/slides.model';
+import SlideStream from '../../models/slides_stream.model';
 import { Types } from 'mongoose';
 
-export class AssignmentService {
+export class AssignmentService extends BaseService {
 	async createFolder(
 		name: string,
 		parentId: string | null,
@@ -155,7 +158,40 @@ export class AssignmentService {
 	}
 
 	async updateById(payload: any, id: string) {
-		return await Assignment.findByIdAndUpdate(id, payload, { new: true });
+		// Make assign_stream and slide_stream depended on assignId
+		const assignment = await Assignment.findByIdOrFail(id);
+		// If change access to public then just update assigment without change any to stream
+		const justUpdatedAssignment =
+			payload.access === 'private' ||
+			(!payload.access && assignment.access === 'private');
+
+		if (justUpdatedAssignment) {
+			return await Assignment.findByIdAndUpdate(id, payload, { new: true });
+		}
+
+		const { assignmentData, listSlideData } =
+			await this.makeCopyAssignmentDataStream(id);
+		const assignStream = await AssignmentStream.findOne({ assignment: id });
+		// means not exist
+		if (!assignStream) {
+			await AssignmentStream.create({ ...assignmentData, assignment: id });
+			await SlideStream.create(listSlideData);
+		} else {
+			delete assignmentData._id;
+			delete assignmentData.slides;
+			await AssignmentStream.findByIdAndUpdate(
+				assignStream._id,
+				assignmentData
+			);
+		}
+		return await Assignment.findByIdAndUpdate(id, payload, {
+			new: true,
+		}).populate({
+			path: 'slides',
+			options: {
+				sort: 'order',
+			},
+		});
 	}
 
 	async deleteById(id: string) {
@@ -174,7 +210,7 @@ export class AssignmentService {
 
 	async makeCopyAssignmentData(
 		id: string | Types.ObjectId,
-		user: IUserDocument,
+		user?: IUserDocument | null,
 		suffixName: string = ' (copy)'
 	) {
 		const assignment = await Assignment.findByIdOrFail(id, user);
@@ -201,9 +237,41 @@ export class AssignmentService {
 		return { listSlideData, assignmentData };
 	}
 
-	async getSharedAssignments() {
-		const results = await Assignment.find({ access: 'shared' });
+	async makeCopyAssignmentDataStream(id: string | Types.ObjectId) {
+		const assignment = await Assignment.findByIdOrFail(id);
+		const assignId = new Types.ObjectId();
+		const slides = await Slide.find({ assignment: assignment._id });
+		const listSlideData = slides.map((slide) => ({
+			...slide.toJSON(),
+			_id: new Types.ObjectId(),
+			assignment: assignId, //stream
+			slide: slide._id,
+		}));
+		const assignmentData = {
+			_id: assignId,
+			name: assignment.name,
+			subjects: assignment.subjects,
+			grades: assignment.grades,
+			desc: assignment.desc,
+			permissions: assignment.permissions,
+			slideCounts: assignment.slideCounts,
+			parentId: assignment.parentId,
+			owner: assignment.owner,
+			belongs: assignment.owner,
+			slides: listSlideData.map(({ _id }) => _id),
+		};
+		return { listSlideData, assignmentData };
+	}
+
+	async getSharedAssignments(rawQuery: any) {
+		const q = JSON.parse(rawQuery?.q ?? '{}');
+		const results = await AssignmentStream.find({ ...q }).populate('slides');
 		return results;
+	}
+
+	async findSharedAssignment(id: string) {
+		const result = await AssignmentStream.findById(id).populate('slides');
+		return result;
 	}
 }
 

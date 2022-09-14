@@ -1,5 +1,7 @@
 import Slide, { ISlideDocument } from '../models/slides.model';
 
+import Assignment from '../models/assignment.model';
+import SlideStream from '../models/slides_stream.model';
 import { Socket } from 'socket.io';
 
 const joinSlide = (socket: Socket, slide: ISlideDocument) => {
@@ -25,7 +27,12 @@ const slideSocket = (socket: Socket) => {
 
 	socket.on('save', async (payload: any, id: string) => {
 		console.log('prev save');
-		await Slide.findByIdAndUpdate(id, payload);
+		const slide = await Slide.findByIdAndUpdate(id, payload, { new: true });
+		const assignmentId = slide.assignment;
+		const assignment = await Assignment.findById(assignmentId);
+		if (assignment && assignment.access === 'shared') {
+			await SlideStream.findOneAndUpdate({ slide: slide._id }, payload);
+		}
 	});
 };
 

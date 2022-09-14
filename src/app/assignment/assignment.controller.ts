@@ -61,8 +61,16 @@ export class AssignmentController extends BaseController {
 
 	async getSharedAssignments(req: Request, res: Response, next: NextFunction) {
 		const { query } = req;
-		const assignments = await assignmentService.getSharedAssignments();
+		const assignments = await assignmentService.getSharedAssignments(query);
 		return new HttpResponse({ res, data: assignments });
+	}
+
+	async findSharedAssignment(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id;
+		const assignment = await assignmentService.findSharedAssignment(
+			id as string
+		);
+		return new HttpResponse({ res, data: assignment });
 	}
 
 	async findAssignment(req: Request, res: Response, next: NextFunction) {
