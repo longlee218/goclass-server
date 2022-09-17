@@ -1,5 +1,6 @@
 import http from 'http';
 import { instrument } from '@socket.io/admin-ui';
+import notifySocket from '../socket/notify.socket';
 import slideSocket from '../socket/slide.socket';
 import socket from 'socket.io';
 
@@ -24,6 +25,7 @@ function SocketServer(httpServer: http.Server) {
 	});
 
 	io.of('/slide').on('connection', slideSocket);
+	io.of('/notify').on('connection', notifySocket);
 
 	instrument(io, { auth: false });
 	return io;

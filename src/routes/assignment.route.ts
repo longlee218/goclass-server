@@ -91,4 +91,10 @@ router.post(
 	)
 );
 
+router.get(
+	ROUTES.ASSIGMENT_LIB,
+	[authJwt],
+	CatchAsync(assignmentController.getAllLibraries.bind(assignmentController))
+);
+
 export default router;

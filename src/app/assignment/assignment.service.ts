@@ -169,6 +169,15 @@ export class AssignmentService extends BaseService {
 			return await Assignment.findByIdAndUpdate(id, payload, { new: true });
 		}
 
+		const data = await Assignment.findByIdAndUpdate(id, payload, {
+			new: true,
+		}).populate({
+			path: 'slides',
+			options: {
+				sort: 'order',
+			},
+		});
+
 		const { assignmentData, listSlideData } =
 			await this.makeCopyAssignmentDataStream(id);
 		const assignStream = await AssignmentStream.findOne({ assignment: id });
@@ -184,14 +193,7 @@ export class AssignmentService extends BaseService {
 				assignmentData
 			);
 		}
-		return await Assignment.findByIdAndUpdate(id, payload, {
-			new: true,
-		}).populate({
-			path: 'slides',
-			options: {
-				sort: 'order',
-			},
-		});
+		return data;
 	}
 
 	async deleteById(id: string) {

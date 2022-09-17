@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { AssignmentFolder } from '../../models';
 import BaseController from '../../core/base.controller';
 import HttpResponse from '../../utils/HttpResponse';
+import Library from '../../models/library.model';
 import Roster from '../../models/roster.model';
 import { Types } from 'mongoose';
 import assignmentService from './assignment.service';
@@ -71,6 +72,11 @@ export class AssignmentController extends BaseController {
 			id as string
 		);
 		return new HttpResponse({ res, data: assignment });
+	}
+
+	async getAllLibraries(req: Request, res: Response, next: NextFunction) {
+		const libraryItems = await Library.find({ user: req.user._id });
+		return new HttpResponse({ res, data: libraryItems });
 	}
 
 	async findAssignment(req: Request, res: Response, next: NextFunction) {

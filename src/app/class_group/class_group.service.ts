@@ -16,13 +16,14 @@ export class ClassGroupService {
 	}
 
 	async updateGroup(id: string, user: IUserDocument, payload: any) {
-		const group = await ClassGroup.findById(id).orFail(
-			() => new HttpError(_404, 404, ERROR_NOT_FOUND)
-		);
-		if (!group.ownerId.equals(user._id)) {
-			throw new HttpError(_403, 403, ERROR_FORBIDDEN);
-		}
-		return await group.updateOne(payload, { new: true });
+		// const group = await ClassGroup.findById(id).orFail(
+		// 	() => new HttpError(_404, 404, ERROR_NOT_FOUND)
+		// );
+		// if (!group.ownerId.equals(user._id)) {
+		// 	throw new HttpError(_403, 403, ERROR_FORBIDDEN);
+		// }
+		// return await group.updateOne(payload, { new: true });
+		return await ClassGroup.findByIdAndUpdate(id, payload, { new: true });
 	}
 
 	async deleteGroup(id: string, user: IUserDocument) {

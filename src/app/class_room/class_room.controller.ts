@@ -2,7 +2,9 @@ import { ClassRoom, StudentClassRoom } from '../../models';
 import { NextFunction, Request, Response } from 'express';
 
 import BaseController from '../../core/base.controller';
+import ClassRoomAlert from '../../models/class_room_alert.model';
 import HttpResponse from '../../utils/HttpResponse';
+import Notify from '../../models/notify.model';
 import class_roomService from './class_room.service';
 
 export class ClassRoomController extends BaseController {
@@ -78,6 +80,31 @@ export class ClassRoomController extends BaseController {
 		});
 		await Promise.all(promiseActions);
 		res.sendStatus(201);
+	}
+
+	async createAlert(req: Request, res: Response, next: NextFunction) {
+		const classRoomId = req.params.id;
+		const payload = req.body;
+		const notify = await ClassRoomAlert.create({
+			...payload,
+			classRoomId,
+			createdBy: req.user._id,
+		});
+		return new HttpResponse({ res, data: notify });
+	}
+
+	async getAlert(req: Request, res: Response, next: NextFunction) {
+		const classRoomId = req.params.id;
+		const notify = await ClassRoomAlert.find({
+			createdBy: req.user._id,
+			classRoomId: classRoomId,
+		})
+			.sort('-createdAt')
+			.populate({
+				path: 'createdBy',
+				select: 'fullname avatar',
+			});
+		return new HttpResponse({ res, data: notify });
 	}
 }
 

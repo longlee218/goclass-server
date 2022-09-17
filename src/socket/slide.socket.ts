@@ -1,6 +1,7 @@
 import Slide, { ISlideDocument } from '../models/slides.model';
 
 import Assignment from '../models/assignment.model';
+import Library from '../models/library.model';
 import SlideStream from '../models/slides_stream.model';
 import { Socket } from 'socket.io';
 
@@ -32,6 +33,17 @@ const slideSocket = (socket: Socket) => {
 		const assignment = await Assignment.findById(assignmentId);
 		if (assignment && assignment.access === 'shared') {
 			await SlideStream.findOneAndUpdate({ slide: slide._id }, payload);
+		}
+	});
+
+	socket.on('save-lib', async (payload: any, userId: string) => {
+		console.log('prev save library');
+		if (Array.isArray(payload)) {
+			await Library.create(
+				payload.map((item) => ({ ...item, user: userId }))
+			);
+		} else {
+			await Library.create({ ...payload, user: userId });
 		}
 	});
 };

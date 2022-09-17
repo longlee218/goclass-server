@@ -13,6 +13,7 @@ export const ROUTES = {
 	CLASS_ROOM: '/class-room',
 	CLASS_ROOM_DULIPATE: '/class-room-duplicate',
 	CLASS_ROOM_NEW_SESSION: '/class-room-new-session',
+	CLASS_ROOM_ALERT: '/class-room-alert/:id',
 	CLASS_ROOM_PARAM: '/class-room/:id',
 
 	CLASS_GROUP: '/class-group',
@@ -20,6 +21,7 @@ export const ROUTES = {
 
 	ASSIGNMENTS: '/assignments',
 	ASSIGNMENT_PARAM_SHARED: '/assignment-shared/:id',
+	ASSIGMENT_LIB: '/assignment-lib',
 	ASSIGNMENT_PARAM: '/assignment/:id',
 	ASSIGNMENT_PARAM_DUPLICATE: '/assignment/:id/duplicate',
 	ASSIGNMENT_CATEGORY: '/assign/category/:parentId?',
@@ -45,4 +47,5 @@ export const ROUTES = {
 	ORGANIZATION: '/organization',
 	EMAIL: '/email',
 	EMAIL_EXIST: '/email-exist',
+	NOTIFY: '/notify',
 };
