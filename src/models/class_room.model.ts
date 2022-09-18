@@ -20,7 +20,6 @@ interface IClassRoom extends SoftDeleteInterface {
 	classRoomGroupId: Types.ObjectId;
 	ownerId: Types.ObjectId;
 	isExam: boolean;
-	examClassRoomsId: Array<Types.ObjectId>;
 	color?: string;
 }
 
@@ -58,11 +57,6 @@ const ClassRoomSchema: Schema = new Schema(
 			type: Boolean,
 			default: false,
 		},
-		examClassRoomsId: [
-			{
-				type: Schema.Types.ObjectId,
-			},
-		],
 		color: String,
 	},
 	{
