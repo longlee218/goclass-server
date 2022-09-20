@@ -4,8 +4,9 @@ import { NextFunction, Request, Response } from 'express';
 import BaseController from '../../core/base.controller';
 import ClassRoomAlert from '../../models/class_room_alert.model';
 import HttpResponse from '../../utils/HttpResponse';
-import Notify from '../../models/notify.model';
 import class_roomService from './class_room.service';
+import fs from 'fs';
+import path from 'path';
 
 export class ClassRoomController extends BaseController {
 	constructor() {
@@ -85,9 +86,18 @@ export class ClassRoomController extends BaseController {
 	async createAlert(req: Request, res: Response, next: NextFunction) {
 		const classRoomId = req.params.id;
 		const payload = req.body;
+		const files = req.files as any;
+		const fileUploads = files?.files ?? [];
+		const attachments = fileUploads.map((file: any, index: number) => {
+			return {
+				originalname: file.originalname,
+				dest: '/' + file.path.replaceAll('\\', '/'),
+			};
+		});
 		const notify = await ClassRoomAlert.create({
 			...payload,
 			classRoomId,
+			attachments,
 			createdBy: req.user._id,
 		});
 		return new HttpResponse({ res, data: notify });
@@ -105,6 +115,50 @@ export class ClassRoomController extends BaseController {
 				select: 'fullname avatar',
 			});
 		return new HttpResponse({ res, data: notify });
+	}
+
+	async updateAlert(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id;
+		const files = req.files as any;
+		const fileUploads = files?.files ?? [];
+		const attachments = fileUploads.map((file: any, index: number) => {
+			return {
+				originalname: file.originalname,
+				dest: '/' + file.path.replaceAll('\\', '/'),
+			};
+		});
+		const alert = await ClassRoomAlert.findByIdAndUpdate(
+			id,
+			{
+				...req.body,
+				$push: {
+					attachments: { $each: attachments },
+				},
+			},
+			{
+				new: true,
+			}
+		);
+		return new HttpResponse({ res, data: alert });
+	}
+
+	async deleteAlert(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id;
+		await ClassRoomAlert.deleteById(id);
+		return res.sendStatus(204);
+	}
+
+	async deleteFileAlert(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id;
+		const body = req.body;
+		fs.unlinkSync(path.join(process.cwd(), body.dest as string));
+		const alert = await ClassRoomAlert.findById(id);
+		const attachments = alert.attachments.filter(
+			(attach) => attach.dest !== body.dest
+		);
+		alert.attachments = attachments;
+		await alert.save();
+		return res.sendStatus(204);
 	}
 }
 

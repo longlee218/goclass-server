@@ -30,6 +30,7 @@ function ExpressServer(port: number | string | boolean) {
 	app.use(bodyParser.json());
 	app.use(cookieParser(process.env.SESSION_SECRECT));
 
+	app.use('/public', express.static(path.join(__dirname, '../..', 'public')));
 	// app.use((req, res, next) => {
 	// 	res.append('Access-Control-Allow-Origin', ['*']);
 	// 	res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');

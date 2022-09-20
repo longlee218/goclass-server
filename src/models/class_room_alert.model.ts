@@ -7,6 +7,7 @@ import mongooseDelete, {
 
 interface IClassRoomAlert extends SoftDeleteInterface {
 	name: string;
+	attachments: Array<any>;
 	classRoomId: Types.ObjectId;
 	createdBy: Types.ObjectId;
 }
@@ -20,11 +21,15 @@ export interface IClassRoomAlertModel
 
 const ClassRoomAlertSchema: Schema = new Schema(
 	{
-		content: String,
+		content: {
+			type: String,
+			trim: false,
+		},
 		classRoomId: {
 			type: Schema.Types.ObjectId,
 			ref: 'class_rooms',
 		},
+		attachments: [Schema.Types.Mixed],
 		createdBy: {
 			type: Schema.Types.ObjectId,
 			ref: 'users',

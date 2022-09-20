@@ -2,6 +2,7 @@ import { CookieOptions, NextFunction, Request, Response } from 'express';
 
 import { Auth } from '../../types/request';
 import BaseController from '../../core/base.controller';
+import { CLIENT_HOST } from '../../config/key';
 import HttpResponse from '../../utils/HttpResponse';
 import { IUserDocument } from '../../models/user.model';
 import authService from './auth.service';
@@ -43,9 +44,11 @@ export class AuthController extends BaseController {
 		const tokens = await authService.makeTokenForUser(user as IUserDocument);
 		await user.updateOne({ lastLogin: new Date() }, { new: true });
 		this._saveTokenIntoCookie(res, tokens);
-		res.send(tokens);
-		// res.end('Redirect to ' + CLIENT_HOST);
-		// res.redirect(CLIENT_HOST);
+		const roles = user.roles;
+		if (roles.includes('teacher')) {
+			return res.redirect(CLIENT_HOST + '/teacher/dashboard');
+		}
+		return res.redirect(CLIENT_HOST + '/student/dashboard');
 	}
 
 	/**

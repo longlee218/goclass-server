@@ -4,6 +4,7 @@ import authJwt from '../middlewares/authJwt';
 import class_roomController from '../app/class_room/class_room.controller';
 import express from 'express';
 import schemaValidate from '../middlewares/schemaValidate';
+import { uploadFile } from '../middlewares/uploadFile';
 import validId from '../middlewares/validId';
 
 const validateRequest = schemaValidate(true);
@@ -42,7 +43,7 @@ router.post(
 router
 	.route(ROUTES.CLASS_ROOM_ALERT)
 	.post(
-		[authJwt, validateRequest],
+		[authJwt, uploadFile, validateRequest],
 		CatchAsync(class_roomController.createAlert)
 	)
 	.get([authJwt], CatchAsync(class_roomController.getAlert));
@@ -52,6 +53,23 @@ router.post(
 	authJwt,
 	validateRequest,
 	CatchAsync(class_roomController.addNewSession)
+);
+
+router
+	.route(ROUTES.CLASS_ROOM_ALERT_ID)
+	.patch(
+		[authJwt, uploadFile, validateRequest],
+		CatchAsync(class_roomController.updateAlert)
+	)
+	.delete(
+		[authJwt, validateRequest],
+		CatchAsync(class_roomController.deleteAlert)
+	);
+
+router.delete(
+	ROUTES.CLASS_ROOM_ALERT_ID_FILE,
+	[authJwt],
+	CatchAsync(class_roomController.deleteFileAlert)
 );
 
 export default router;

@@ -14,6 +14,8 @@ export const ROUTES = {
 	CLASS_ROOM_DULIPATE: '/class-room-duplicate',
 	CLASS_ROOM_NEW_SESSION: '/class-room-new-session',
 	CLASS_ROOM_ALERT: '/class-room-alert/:id',
+	CLASS_ROOM_ALERT_ID: '/class-room-alert/detail/:id',
+	CLASS_ROOM_ALERT_ID_FILE: '/class-room-alert/detail/:id/files',
 	CLASS_ROOM_PARAM: '/class-room/:id',
 
 	CLASS_GROUP: '/class-group',
