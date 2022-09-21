@@ -1,4 +1,5 @@
-import { ClassRoom } from '../../models';
+import { ClassRoom, StudentClassRoom } from '../../models';
+
 import { IClassRoomDocument } from '../../models/class_room.model';
 import { IUserDocument } from '../../models/user.model';
 import { Types } from 'mongoose';
@@ -27,6 +28,41 @@ export class ClassRoomService {
 		for (const [key, value] of mapping) {
 			results.push({
 				group: !key ? null : JSON.parse(key),
+				classRooms: value,
+			});
+		}
+		return results;
+	}
+
+	async getClassAndOwnerMapping(user: IUserDocument) {
+		const studentClasses = await StudentClassRoom.find({ student: user._id });
+		const classRooms = await ClassRoom.find({
+			_id: { $in: studentClasses.map((item) => item.classRoom) },
+		})
+			.populate({
+				path: 'ownerId',
+				select: 'fullname email',
+			})
+			.sort('session');
+
+		const mapping = new Map();
+
+		classRooms.forEach((classRoom) => {
+			const ownerId = classRoom.ownerId;
+			delete classRoom.ownerId;
+			const jsonOwner = JSON.stringify(ownerId);
+			if (mapping.has(jsonOwner)) {
+				const items = mapping.get(jsonOwner);
+				mapping.set(jsonOwner, [...items, classRoom]);
+			} else {
+				mapping.set(jsonOwner, [classRoom]);
+			}
+		});
+
+		const results = [];
+		for (const [key, value] of mapping) {
+			results.push({
+				owner: JSON.parse(key),
 				classRooms: value,
 			});
 		}

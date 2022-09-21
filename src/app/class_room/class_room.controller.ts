@@ -4,9 +4,12 @@ import { NextFunction, Request, Response } from 'express';
 import BaseController from '../../core/base.controller';
 import ClassRoomAlert from '../../models/class_room_alert.model';
 import HttpResponse from '../../utils/HttpResponse';
+import { Student } from '../../types/request';
+import { Types } from 'mongoose';
 import class_roomService from './class_room.service';
 import fs from 'fs';
 import path from 'path';
+import studentService from '../student/student.service';
 
 export class ClassRoomController extends BaseController {
 	constructor() {
@@ -18,10 +21,26 @@ export class ClassRoomController extends BaseController {
 		return new HttpResponse({ res, data: result });
 	}
 
+	async query(req: Request, res: Response, next: NextFunction) {
+		const query = JSON.parse(req.query.q as any);
+		const limit = Number(req.query.limit as unknown);
+		if (limit === 1) {
+			const result = await ClassRoom.findOne(query);
+			return new HttpResponse({ res, data: result });
+		}
+		const result = await ClassRoom.find(query);
+		return new HttpResponse({ res, data: result });
+	}
+
 	async get(req: Request, res: Response, next: NextFunction) {
 		const results = await class_roomService.getClassAndGroupRoomMapping(
 			req.user
 		);
+		return new HttpResponse({ res, data: results });
+	}
+
+	async getBelong(req: Request, res: Response, next: NextFunction) {
+		const results = await class_roomService.getClassAndOwnerMapping(req.user);
 		return new HttpResponse({ res, data: results });
 	}
 
@@ -159,6 +178,20 @@ export class ClassRoomController extends BaseController {
 		alert.attachments = attachments;
 		await alert.save();
 		return res.sendStatus(204);
+	}
+
+	async joinClassRoom(req: Request, res: Response, next: NextFunction) {
+		const user = req.user;
+		const payload: Student.RequestAddStudent = {
+			student: user._id,
+			fullname: user.fullname,
+			email: user.email,
+			gender: user?.gender,
+			dob: user?.dob,
+		};
+		const classId = new Types.ObjectId(req.params.id);
+		await studentService.createStudent(payload, classId);
+		return res.sendStatus(200);
 	}
 }
 

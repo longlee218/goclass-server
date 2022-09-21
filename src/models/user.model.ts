@@ -5,6 +5,7 @@ import mongooseDelete, {
 	SoftDeleteModel,
 } from 'mongoose-delete';
 
+import { EnumGender } from '../config/enum';
 import crypto from 'crypto';
 import generateRandomKey from '../utils/GenerateKey';
 import mongoosePaingate from 'mongoose-paginate-v2';
@@ -17,7 +18,7 @@ interface IUser extends SoftDeleteInterface {
 	isEmailVerify: boolean;
 	username: string;
 	fullname: string;
-	gender?: 'male' | 'female' | 'other';
+	gender?: EnumGender;
 	prefix: string;
 	lastLogin: Date;
 	password: string;

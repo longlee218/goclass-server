@@ -20,6 +20,23 @@ router
 		[authJwt, validateRequest],
 		CatchAsync(class_roomController.create).bind(class_roomController)
 	);
+router.get(
+	'/class-room-query',
+	[authJwt],
+	CatchAsync(class_roomController.query.bind(class_roomController))
+);
+
+router.get(
+	'/class-room-belong',
+	[authJwt],
+	CatchAsync(class_roomController.getBelong.bind(class_roomController))
+);
+
+router.post(
+	'/class-room-join/:id',
+	[authJwt],
+	CatchAsync(class_roomController.joinClassRoom)
+);
 
 router
 	.route(ROUTES.CLASS_ROOM_PARAM)
@@ -27,10 +44,7 @@ router
 		[authJwt, validId, validateRequest],
 		CatchAsync(class_roomController.find.bind(class_roomController))
 	)
-	.put(
-		[authJwt, validId, validateRequest],
-		CatchAsync(class_roomController.update)
-	)
+	.patch([authJwt, validId], CatchAsync(class_roomController.update))
 	.delete([authJwt, validId], CatchAsync(class_roomController.delete));
 
 router.post(

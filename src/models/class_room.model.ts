@@ -21,6 +21,10 @@ interface IClassRoom extends SoftDeleteInterface {
 	ownerId: Types.ObjectId;
 	isExam: boolean;
 	color?: string;
+	isSendMail: boolean;
+	isCanJoin: boolean;
+	isCanLeave: boolean;
+	isSendNotify: boolean;
 }
 
 export interface IClassRoomDocument extends IClassRoom, SoftDeleteDocument {}
@@ -58,6 +62,26 @@ const ClassRoomSchema: Schema = new Schema(
 			default: false,
 		},
 		color: String,
+		isSendMail: {
+			type: Boolean,
+			default: false,
+		},
+		isCanJoin: {
+			type: Boolean,
+			default: false,
+		},
+		isCanLeave: {
+			type: Boolean,
+			default: true,
+		},
+		isSendNotify: {
+			type: Boolean,
+			default: true,
+		},
+		isCanMakeAlert: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{
 		timestamps: true,
