@@ -19,6 +19,7 @@ import SlideStream from '../../models/slides_stream.model';
 import { Types } from 'mongoose';
 import assignmentService from '../assignment/assignment.service';
 import examService from './exam.service';
+import { generateEncryptionKey } from '../../utils/Encryption';
 
 class ExamController extends BaseController {
 	async getRosterGroup(req: Request, res: Response, next: NextFunction) {
@@ -111,10 +112,10 @@ class ExamController extends BaseController {
 			}).select('student');
 			const studentIdsFull = studentsInClass.map(({ _id }) => _id);
 
-			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
-				rosterId,
-				studentIdsFull
-			);
+			// const studentsInOtherGroup = await examService.findStudentInOtherGroup(
+			// 	rosterId,
+			// 	studentIdsFull
+			// );
 
 			// if (studentsInOtherGroup.length !== 0) {
 			// 	throw new HttpError(
@@ -274,6 +275,21 @@ class ExamController extends BaseController {
 					'BAD_QUERY'
 				);
 		}
+	}
+
+	async getLiveWorks(req: Request, res: Response, next: NextFunction) {
+		const { roster, sort_field, sort_type, q } = req.query;
+	}
+
+	async joinAssignment(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id;
+		const assignmentStream = await AssignmentStream.findById(id);
+		const slideIds = assignmentStream.slides;
+		const slides = await SlideStream.find({ _id: { $in: slideIds } });
+
+		const encryptKey = generateEncryptionKey();
+
+		slides.forEach((slide) => {});
 	}
 }
 

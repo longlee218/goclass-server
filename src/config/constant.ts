@@ -50,4 +50,5 @@ export const ROUTES = {
 	EMAIL: '/email',
 	EMAIL_EXIST: '/email-exist',
 	NOTIFY: '/notify',
+	SEARCHING: '/searching',
 };

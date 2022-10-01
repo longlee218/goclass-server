@@ -4,9 +4,9 @@
 	"description": "This is app for Education",
 	"main": "src/app.js",
 	"scripts": {
-		"start": "tsc && node build/app.js",
+		"start": "tsc && node build/src/app.js",
 		"build": "tsc",
-		"product": "node build/app.js",
+		"product": "node build/src/app.js",
 		"dev": "nodemon .",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint . --ext .ts"
@@ -41,6 +41,8 @@
 		"cors": "^2.8.5",
 		"dotenv": "^16.0.0",
 		"express": "^4.18.1",
+		"firebase": "^8.3.3",
+		"firebase-admin": "^11.0.1",
 		"helmet": "^5.0.2",
 		"joi": "^17.6.0",
 		"jsonwebtoken": "^8.5.1",

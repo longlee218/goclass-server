@@ -124,16 +124,24 @@ export class ClassRoomController extends BaseController {
 
 	async getAlert(req: Request, res: Response, next: NextFunction) {
 		const classRoomId = req.params.id;
-		const notify = await ClassRoomAlert.find({
-			createdBy: req.user._id,
-			classRoomId: classRoomId,
-		})
-			.sort('-createdAt')
-			.populate({
-				path: 'createdBy',
-				select: 'fullname avatar',
-			});
-		return new HttpResponse({ res, data: notify });
+		const classRoom = await ClassRoom.findById(classRoomId);
+		const isInClass =
+			(await StudentClassRoom.exists({
+				classRoom: classRoomId,
+				student: req.user.id,
+			})) || classRoom.ownerId.toString() === req.user.id;
+		if (isInClass) {
+			const notify = await ClassRoomAlert.find({
+				classRoomId: classRoomId,
+			})
+				.sort('-createdAt')
+				.populate({
+					path: 'createdBy',
+					select: 'fullname avatar',
+				});
+			return new HttpResponse({ res, data: notify });
+		}
+		return new HttpResponse({ res, data: [] });
 	}
 
 	async updateAlert(req: Request, res: Response, next: NextFunction) {
@@ -191,6 +199,18 @@ export class ClassRoomController extends BaseController {
 		};
 		const classId = new Types.ObjectId(req.params.id);
 		await studentService.createStudent(payload, classId);
+		return res.sendStatus(200);
+	}
+
+	async leave(req: Request, res: Response, next: NextFunction) {
+		const user = req.user;
+		const id = req.params.id;
+		const classRoom = await ClassRoom.findById(id);
+		if (classRoom.isCanLeave) {
+			await StudentClassRoom.deleteOne({ student: user._id, classRoom: id });
+			classRoom.countStudents = classRoom.countStudents - 1;
+			await classRoom.save();
+		}
 		return res.sendStatus(200);
 	}
 }

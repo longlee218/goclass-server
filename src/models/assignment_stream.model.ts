@@ -5,9 +5,6 @@ import mongooseDelete, {
 	SoftDeleteModel,
 } from 'mongoose-delete';
 
-import { ERROR_NOT_FOUND } from '../config/error';
-import HttpError from '../utils/HttpError';
-import { IUserDocument } from './user.model';
 import { _404 } from '../config/message_code';
 
 interface IAssignmentStream extends SoftDeleteInterface {
@@ -19,6 +16,7 @@ interface IAssignmentStream extends SoftDeleteInterface {
 	slideCounts: number;
 	owner: Types.ObjectId;
 	slides: Array<Types.ObjectId>;
+	downloads: number;
 }
 
 export interface IAssignmentStreamDocument

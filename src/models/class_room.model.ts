@@ -50,7 +50,7 @@ const ClassRoomSchema: Schema = new Schema(
 		session: String,
 		classRoomGroupId: {
 			type: Schema.Types.ObjectId,
-			ref: 'class_room_groups',
+			ref: 'class_groups',
 		},
 		desc: String,
 		ownerId: {

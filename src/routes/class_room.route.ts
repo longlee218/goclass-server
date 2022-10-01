@@ -38,6 +38,12 @@ router.post(
 	CatchAsync(class_roomController.joinClassRoom)
 );
 
+router.post(
+	'/class-room-leave/:id',
+	[authJwt],
+	CatchAsync(class_roomController.leave)
+);
+
 router
 	.route(ROUTES.CLASS_ROOM_PARAM)
 	.get(

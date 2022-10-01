@@ -13,5 +13,7 @@ router.get(
 
 router.get(ROUTES.EMAIL, authJwt, CatchAsync(otherController.paginateEmail));
 router.get(ROUTES.EMAIL_EXIST, CatchAsync(otherController.isExistEmail));
+router.get(ROUTES.SEARCHING, authJwt, CatchAsync(otherController.queryAllApp));
+router.get('/test', authJwt, CatchAsync(otherController.test));
 
 export default router;

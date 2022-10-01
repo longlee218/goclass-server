@@ -24,7 +24,6 @@ const makeRoutes = (app: Express) => {
 		)
 		.then(() => {
 			app.get('*', (req, res) => {
-				console.log('funning');
 				return res.status(404).json({
 					isSuccess: false,
 					error: 'Not found this route.',

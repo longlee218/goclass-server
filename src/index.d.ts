@@ -5,3 +5,9 @@ declare global {
 		interface User extends IUserDocument {}
 	}
 }
+
+declare module 'crypto' {
+	namespace webcrypto {
+		const subtle: SubtleCrypto;
+	}
+}

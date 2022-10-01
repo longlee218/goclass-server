@@ -4,6 +4,7 @@ import { AssignmentFolder } from '../../models';
 import AssignmentStream from '../../models/assignment_stream.model';
 import BaseService from '../../core/base.service';
 import { EnumStatusRoster } from '../../config/enum';
+import HttpError from '../../utils/HttpError';
 import { IUserDocument } from '../../models/user.model';
 import Roster from '../../models/roster.model';
 import Slide from '../../models/slides.model';
@@ -197,7 +198,8 @@ export class AssignmentService extends BaseService {
 	}
 
 	async deleteById(id: string) {
-		return await Assignment.findByIdAndDelete(id);
+		await Assignment.deleteById(id);
+		await AssignmentStream.deleteOne({ assignment: id });
 	}
 
 	async copyAssignment(
@@ -267,7 +269,15 @@ export class AssignmentService extends BaseService {
 
 	async getSharedAssignments(rawQuery: any) {
 		const q = JSON.parse(rawQuery?.q ?? '{}');
-		const results = await AssignmentStream.find({ ...q }).populate('slides');
+		const results = await AssignmentStream.find({ ...q })
+			.populate({
+				path: 'slides',
+				select: '_id name thumbnail createdAt',
+				options: {
+					limit: 1,
+				},
+			})
+			.lean();
 		return results;
 	}
 
