@@ -4,6 +4,7 @@ export default (fn: Function) => {
 	return (req: Request, res: Response, next: NextFunction) => {
 		fn(req, res, next).catch((error: any) => {
 			const isDevelop = process.env.MODE === 'develop';
+			console.log(error);
 			if (isDevelop) {
 				return res.status(error?.status || 500).json({
 					isSuccess: error.isSuccess,

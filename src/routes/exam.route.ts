@@ -35,4 +35,11 @@ router.get(
 	[authJwt],
 	CatchAsync(examController.getExamForStudent.bind(examController))
 );
+
+router.post(
+	ROUTES.EXAM_JOIN,
+	[authJwt],
+	CatchAsync(examController.joinAssignment)
+);
+
 export default router;

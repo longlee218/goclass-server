@@ -2,6 +2,12 @@ import BaseService from '../../core/base.service';
 import { EnumStatusRosterGroup } from '../../config/enum';
 import RosterGroup from '../../models/roster_group.model';
 import { Types } from 'mongoose';
+import { generateEncryptionKey } from '../../utils/Encryption';
+import { saveToFirebase } from '../../utils/Firebase';
+import AssignmentWork from '../../models/assignment_work.model';
+import { IUserDocument } from '../../models/user.model';
+import { CLIENT_HOST_EDITOR } from '../../config/key';
+import { ISlideDocument } from '../../models/slides.model';
 
 class ExamService extends BaseService {
 	async findStudentInOtherGroup(
@@ -27,19 +33,25 @@ class ExamService extends BaseService {
 		);
 	}
 
-	async getToDoExam(studentIds: string[]) {
+	async getExam(studentIds: string[], isTodo: boolean) {
 		const groups = await RosterGroup.aggregate([
 			{
 				$match: {
 					students: { $elemMatch: { $in: studentIds } },
-					$or: [
-						{
-							status: EnumStatusRosterGroup.Ready,
-						},
-						{
-							status: EnumStatusRosterGroup.Online,
-						},
-					],
+					...(isTodo
+						? {
+								$or: [
+									{
+										status: EnumStatusRosterGroup.Ready,
+									},
+									{
+										status: EnumStatusRosterGroup.Online,
+									},
+								],
+						  }
+						: {
+								status: EnumStatusRosterGroup.Finished,
+						  }),
 				},
 			},
 			{
@@ -67,27 +79,6 @@ class ExamService extends BaseService {
 					preserveNullAndEmptyArrays: false,
 				},
 			},
-			// {
-			// 	$lookup: {
-			// 		from: 'assignment_streams',
-			// 		let: {
-			// 			localField: '$roster.assignmentStream',
-			// 		},
-			// 		pipeline: [
-			// 			{
-			// 				$match: {
-			// 					$expr: { $eq: ['$$localField', '$_id'] },
-			// 				},
-			// 			},
-			// 			{
-			// 				$sort: {
-			// 					createdAt: -1,
-			// 				},
-			// 			},
-			// 		],
-			// 		as: 'assignmentStream',
-			// 	},
-			// },
 			{
 				$lookup: {
 					from: 'assignments',
@@ -176,6 +167,73 @@ class ExamService extends BaseService {
 			},
 		]);
 		return groups;
+	}
+	makeLinkEditor(
+		slideId: string,
+		encryptKey: string,
+		rosterGroupId: string,
+		userId: string
+	) {
+		return (
+			CLIENT_HOST_EDITOR +
+			`/#room=${slideId},${encryptKey},${rosterGroupId},${userId}`
+		);
+	}
+	async makeDataSlideToFirebase(
+		slides: Array<ISlideDocument>,
+		rosterGroupId: Types.ObjectId,
+		user: IUserDocument
+	) {
+		const assignWork = await AssignmentWork.findOne({
+			assignmentId: slides[0].assignment,
+			rosterGroupId: rosterGroupId,
+			workBy: user._id,
+		});
+		const self = this;
+		if (!assignWork) {
+			const encryptKey = await generateEncryptionKey<'string'>();
+			const promises = slides.map((slide) => {
+				return saveToFirebase(
+					{
+						roomId: slide.id,
+						roomKey: encryptKey,
+					},
+					slide.elements,
+					slide.appState
+				);
+			});
+			return Promise.all(promises)
+				.then(() => {
+					return AssignmentWork.create({
+						encryptKey: encryptKey,
+						assignmentId: slides[0].assignment,
+						rosterGroupId: rosterGroupId,
+						slideIds: slides.map(({ _id }) => _id),
+						workBy: user._id,
+					});
+				})
+				.then((assignWork) => {
+					return {
+						...assignWork.toJSON(),
+						link: self.makeLinkEditor(
+							assignWork.slideIds[0].toString(),
+							assignWork.encryptKey,
+							rosterGroupId.toString(),
+							user.id
+						),
+					};
+				});
+		} else {
+			return {
+				...assignWork.toJSON(),
+				link: self.makeLinkEditor(
+					assignWork.slideIds[0].toString(),
+					assignWork.encryptKey,
+					rosterGroupId.toString(),
+					user.id
+				),
+			};
+		}
 	}
 }
 

@@ -1,12 +1,7 @@
 import { ClassRoom, StudentClassRoom } from '../../models';
 import { EnumStatusRoster, EnumStatusRosterGroup } from '../../config/enum';
 import { NextFunction, Request, Response } from 'express';
-import {
-	STUDENT_ARE_IN_OTHER_GROUP,
-	_200,
-	_400,
-	_404,
-} from '../../config/message_code';
+import { _200, _400, _404 } from '../../config/message_code';
 
 import AssignmentStream from '../../models/assignment_stream.model';
 import BaseController from '../../core/base.controller';
@@ -17,9 +12,10 @@ import Roster from '../../models/roster.model';
 import RosterGroup from '../../models/roster_group.model';
 import SlideStream from '../../models/slides_stream.model';
 import { Types } from 'mongoose';
-import assignmentService from '../assignment/assignment.service';
 import examService from './exam.service';
 import { generateEncryptionKey } from '../../utils/Encryption';
+import Assignment from '../../models/assignment.model';
+import Slide from '../../models/slides.model';
 
 class ExamController extends BaseController {
 	async getRosterGroup(req: Request, res: Response, next: NextFunction) {
@@ -258,16 +254,15 @@ class ExamController extends BaseController {
 			isActive: true,
 			student: user._id,
 		}).select('_id');
+		const mystudentsId = belongClassRooms.map(({ _id }) => _id);
 		const type = query.type;
 		switch (type) {
 			case 'todo':
-				const mystudentsId = belongClassRooms.map(({ _id }) => _id);
-				const todoExams = await examService.getToDoExam(mystudentsId);
+				const todoExams = await examService.getExam(mystudentsId, true);
 				return new HttpResponse({ res, data: todoExams });
 			case 'finish':
-				// const mystudentsId = belongClassRooms.map(({ _id }) => _id);
-				// const todoExams = await examService.getToDoExam(mystudentsId);
-				return new HttpResponse({ res, data: todoExams });
+				const finishExams = await examService.getExam(mystudentsId, false);
+				return new HttpResponse({ res, data: finishExams });
 			default:
 				throw new HttpError(
 					'Invalid query type: ' + query.type,
@@ -277,19 +272,19 @@ class ExamController extends BaseController {
 		}
 	}
 
-	async getLiveWorks(req: Request, res: Response, next: NextFunction) {
-		const { roster, sort_field, sort_type, q } = req.query;
-	}
-
 	async joinAssignment(req: Request, res: Response, next: NextFunction) {
-		const id = req.params.id;
-		const assignmentStream = await AssignmentStream.findById(id);
-		const slideIds = assignmentStream.slides;
-		const slides = await SlideStream.find({ _id: { $in: slideIds } });
-
-		const encryptKey = generateEncryptionKey();
-
-		slides.forEach((slide) => {});
+		const { assignmentId, rosterGroupId } = req.body;
+		const slides = await Slide.find({ assignment: assignmentId });
+		const results = await examService.makeDataSlideToFirebase(
+			slides,
+			rosterGroupId,
+			req.user
+		);
+		return new HttpResponse({
+			res,
+			data: results,
+			statusCode: 200,
+		});
 	}
 }
 

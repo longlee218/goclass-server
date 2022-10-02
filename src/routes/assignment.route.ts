@@ -96,5 +96,8 @@ router.get(
 	[authJwt],
 	CatchAsync(assignmentController.getAllLibraries.bind(assignmentController))
 );
-
+router.get(
+	ROUTES.ASSIGMENT_HINTS,
+	CatchAsync(assignmentController.loadHints.bind(assignmentController))
+);
 export default router;

@@ -10,6 +10,7 @@ interface IRosterGroup extends SoftDeleteDocument {
 	name: string;
 	classRoom: Types.ObjectId;
 	students: Array<Types.ObjectId>;
+	studentFinishs: Array<Types.ObjectId>;
 	roster: Types.ObjectId;
 	isShowResult: boolean;
 	isBlock: boolean;
@@ -37,6 +38,12 @@ const RosterGroupSchema: Schema = new Schema(
 			ref: 'class_rooms',
 		},
 		students: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'users',
+			},
+		],
+		studentFinishs: [
 			{
 				type: Schema.Types.ObjectId,
 				ref: 'users',

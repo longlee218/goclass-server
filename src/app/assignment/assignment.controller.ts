@@ -7,6 +7,10 @@ import Library from '../../models/library.model';
 import Roster from '../../models/roster.model';
 import { Types } from 'mongoose';
 import assignmentService from './assignment.service';
+import Slide from '../../models/slides.model';
+import AssignmentWork from '../../models/assignment_work.model';
+import examService from '../exam/exam.service';
+import RosterGroup from '../../models/roster_group.model';
 
 export class AssignmentController extends BaseController {
 	async createFolder(req: Request, res: Response, next: NextFunction) {
@@ -102,6 +106,59 @@ export class AssignmentController extends BaseController {
 		const id = req.params.id as string;
 		const assignCopy = await assignmentService.copyAssignment(id, req.user);
 		return new HttpResponse({ res, data: assignCopy });
+	}
+
+	async loadHints(req: Request, res: Response, next: NextFunction) {
+		const { rosterGroupId, slideId, userId } = req.query;
+		const assignWork = await AssignmentWork.findOne({
+			rosterGroupId,
+			workBy: userId,
+		});
+		const rosterGroup = await RosterGroup.findById(rosterGroupId);
+
+		const slide = rosterGroup.isShowResult
+			? await Slide.findById(slideId).select('name desc points')
+			: await Slide.findById(slideId).select('name desc');
+		if (!assignWork) {
+			return new HttpResponse({
+				res,
+				data: {
+					numSlide: 1,
+					...slide.toJSON(),
+					prevUrl: null,
+					nextUrl: null,
+				},
+			});
+		}
+		const slideIds = assignWork.slideIds.map((e) => e.toString());
+		const index = slideIds.indexOf(slideId as string);
+		const nextUrl =
+			index === slideIds.length - 1
+				? null
+				: examService.makeLinkEditor(
+						slideIds[index + 1],
+						assignWork.encryptKey,
+						rosterGroupId as string,
+						userId as string
+				  );
+		const prevUrl =
+			index === 0
+				? null
+				: examService.makeLinkEditor(
+						slideIds[index - 1],
+						assignWork.encryptKey,
+						rosterGroupId as string,
+						userId as string
+				  );
+		return new HttpResponse({
+			res,
+			data: {
+				numSlide: index + 1,
+				...slide.toJSON(),
+				prevUrl,
+				nextUrl,
+			},
+		});
 	}
 }
 

@@ -24,6 +24,7 @@ export const ROUTES = {
 	ASSIGNMENTS: '/assignments',
 	ASSIGNMENT_PARAM_SHARED: '/assignment-shared/:id',
 	ASSIGMENT_LIB: '/assignment-lib',
+	ASSIGMENT_HINTS: '/hints',
 	ASSIGNMENT_PARAM: '/assignment/:id',
 	ASSIGNMENT_PARAM_DUPLICATE: '/assignment/:id/duplicate',
 	ASSIGNMENT_CATEGORY: '/assign/category/:parentId?',
@@ -45,7 +46,7 @@ export const ROUTES = {
 	ROSTER_GROUP_PARAM: '/exam/roster-group/:id',
 
 	EXAM_ANALYZE: '/exam/analyze',
-
+	EXAM_JOIN: '/exam/join',
 	ORGANIZATION: '/organization',
 	EMAIL: '/email',
 	EMAIL_EXIST: '/email-exist',

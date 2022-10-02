@@ -28,9 +28,11 @@ export const generateEncryptionKey = async <
 		true, // extractable
 		['encrypt', 'decrypt']
 	);
-	return returnAs === 'cryptoKey'
-		? key
-		: (await crypto.webcrypto.subtle.exportKey('jwk', key)).k;
+	return (
+		returnAs === 'cryptoKey'
+			? key
+			: (await crypto.webcrypto.subtle.exportKey('jwk', key)).k
+	) as T extends 'cryptoKey' ? CryptoKey : string;
 };
 
 export const getCryptoKey = (key: string, usage: KeyUsage) =>
@@ -83,11 +85,6 @@ export const decryptData = async (
 	encrypted: Uint8Array | ArrayBuffer,
 	privateKey: string
 ) => {
-	console.log({
-		iv,
-		encrypted,
-		privateKey,
-	});
 	const key = await getCryptoKey(privateKey, 'decrypt');
 	return crypto.webcrypto.subtle.decrypt(
 		{
