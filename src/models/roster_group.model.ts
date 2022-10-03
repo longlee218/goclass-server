@@ -40,7 +40,7 @@ const RosterGroupSchema: Schema = new Schema(
 		students: [
 			{
 				type: Schema.Types.ObjectId,
-				ref: 'users',
+				ref: 'student_class_rooms',
 			},
 		],
 		studentFinishs: [

@@ -3,6 +3,7 @@ import { EnumStatusRoster, EnumStatusRosterGroup } from '../../config/enum';
 import { NextFunction, Request, Response } from 'express';
 import { _200, _400, _404 } from '../../config/message_code';
 
+import Assignment from '../../models/assignment.model';
 import AssignmentStream from '../../models/assignment_stream.model';
 import BaseController from '../../core/base.controller';
 import { Exam } from '../../types/request';
@@ -10,12 +11,11 @@ import HttpError from '../../utils/HttpError';
 import HttpResponse from '../../utils/HttpResponse';
 import Roster from '../../models/roster.model';
 import RosterGroup from '../../models/roster_group.model';
+import Slide from '../../models/slides.model';
 import SlideStream from '../../models/slides_stream.model';
 import { Types } from 'mongoose';
 import examService from './exam.service';
 import { generateEncryptionKey } from '../../utils/Encryption';
-import Assignment from '../../models/assignment.model';
-import Slide from '../../models/slides.model';
 
 class ExamController extends BaseController {
 	async getRosterGroup(req: Request, res: Response, next: NextFunction) {
@@ -126,10 +126,10 @@ class ExamController extends BaseController {
 			rosterGroup.students = studentIdsFull;
 		} else {
 			rosterGroup.name = name;
-			const studentsInOtherGroup = await examService.findStudentInOtherGroup(
-				rosterId,
-				students
-			);
+			// const studentsInOtherGroup = await examService.findStudentInOtherGroup(
+			// 	rosterId,
+			// 	students
+			// );
 			// if (studentsInOtherGroup.length !== 0) {
 			// 	throw new HttpError(
 			// 		STUDENT_ARE_IN_OTHER_GROUP,

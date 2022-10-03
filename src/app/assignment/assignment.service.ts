@@ -282,7 +282,13 @@ export class AssignmentService extends BaseService {
 	}
 
 	async findSharedAssignment(id: string) {
-		const result = await AssignmentStream.findById(id).populate('slides');
+		const result = await AssignmentStream.findById(id).populate({
+			path: 'slides',
+			select: 'order name thumbnail points',
+			options: {
+				sort: 'order',
+			},
+		});
 		return result;
 	}
 }

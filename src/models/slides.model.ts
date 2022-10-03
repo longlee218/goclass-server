@@ -6,6 +6,7 @@ import mongooseDelete, {
 } from 'mongoose-delete';
 
 interface ISlide extends SoftDeleteInterface {
+	name: string;
 	elements: Array<object>;
 	appState: object;
 	files: object;

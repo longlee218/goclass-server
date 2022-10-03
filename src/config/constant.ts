@@ -25,6 +25,7 @@ export const ROUTES = {
 	ASSIGNMENT_PARAM_SHARED: '/assignment-shared/:id',
 	ASSIGMENT_LIB: '/assignment-lib',
 	ASSIGMENT_HINTS: '/hints',
+	ASSIGNMENT_DOWNLOAD: '/assignment-download/:id',
 	ASSIGNMENT_PARAM: '/assignment/:id',
 	ASSIGNMENT_PARAM_DUPLICATE: '/assignment/:id/duplicate',
 	ASSIGNMENT_CATEGORY: '/assign/category/:parentId?',

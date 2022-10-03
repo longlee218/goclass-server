@@ -1,16 +1,20 @@
 import { NextFunction, Request, Response } from 'express';
 
+import Assignment from '../../models/assignment.model';
 import { AssignmentFolder } from '../../models';
+import AssignmentStream from '../../models/assignment_stream.model';
+import AssignmentWork from '../../models/assignment_work.model';
 import BaseController from '../../core/base.controller';
+import { EnumStatusRoster } from '../../config/enum';
 import HttpResponse from '../../utils/HttpResponse';
 import Library from '../../models/library.model';
 import Roster from '../../models/roster.model';
+import RosterGroup from '../../models/roster_group.model';
+import Slide from '../../models/slides.model';
+import SlideStream from '../../models/slides_stream.model';
 import { Types } from 'mongoose';
 import assignmentService from './assignment.service';
-import Slide from '../../models/slides.model';
-import AssignmentWork from '../../models/assignment_work.model';
 import examService from '../exam/exam.service';
-import RosterGroup from '../../models/roster_group.model';
 
 export class AssignmentController extends BaseController {
 	async createFolder(req: Request, res: Response, next: NextFunction) {
@@ -115,10 +119,10 @@ export class AssignmentController extends BaseController {
 			workBy: userId,
 		});
 		const rosterGroup = await RosterGroup.findById(rosterGroupId);
-
-		const slide = rosterGroup.isShowResult
-			? await Slide.findById(slideId).select('name desc points')
-			: await Slide.findById(slideId).select('name desc');
+		const selectStr = rosterGroup.isShowResult
+			? 'name desc points'
+			: 'name desc';
+		const slide = await Slide.findById(slideId).select(selectStr);
 		if (!assignWork) {
 			return new HttpResponse({
 				res,
@@ -159,6 +163,72 @@ export class AssignmentController extends BaseController {
 				nextUrl,
 			},
 		});
+	}
+
+	async downloadAssignment(req: Request, res: Response, next: NextFunction) {
+		const { user } = req;
+		const assignmentId = req.params.id;
+		const assginStream = await AssignmentStream.findById(assignmentId);
+		if (!assginStream) {
+			return res.sendStatus(404);
+		}
+		const folderName = 'Downloads';
+		let folder = await AssignmentFolder.findOne({
+			owner: user._id,
+			name: folderName,
+		});
+		if (!folder) {
+			folder = (
+				await assignmentService.createFolder(folderName, null, user)
+			).pop();
+		}
+		const slideStreams = await SlideStream.find({ assignment: assignmentId });
+		const assignId = new Types.ObjectId();
+		const listSlideData = slideStreams.map(
+			({
+				name,
+				elements,
+				appState,
+				files,
+				order,
+				points,
+				desc,
+				thumbnail,
+			}) => {
+				return {
+					_id: new Types.ObjectId(),
+					name,
+					elements,
+					appState,
+					files,
+					order,
+					points,
+					desc,
+					thumbnail,
+					assignment: assignId,
+				};
+			}
+		);
+		await Slide.create(listSlideData);
+		const roster = await Roster.create({
+			status: EnumStatusRoster.Offline,
+			assignment: assignId,
+		});
+		const assignment = await Assignment.create({
+			_id: assignId,
+			name: assginStream.name,
+			grades: assginStream.grades,
+			subjects: assginStream.subjects,
+			owner: user._id,
+			parentId: folder._id,
+			slideCounts: listSlideData.length,
+			slides: listSlideData.map(({ _id }) => _id),
+			belongs: [folder._id],
+			roster: roster._id,
+		});
+		assginStream.downloads += 1;
+		await assginStream.save();
+		return new HttpResponse({ res, data: assignment });
 	}
 }
 

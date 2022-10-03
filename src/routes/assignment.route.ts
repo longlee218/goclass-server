@@ -82,7 +82,6 @@ router.get(
 		assignmentController.findSharedAssignment.bind(assignmentController)
 	)
 );
-
 router.post(
 	ROUTES.ASSIGNMENT_PARAM_DUPLICATE,
 	[authJwt],
@@ -90,7 +89,6 @@ router.post(
 		assignmentController.duplicateAssignment.bind(assignmentController)
 	)
 );
-
 router.get(
 	ROUTES.ASSIGMENT_LIB,
 	[authJwt],
@@ -99,5 +97,10 @@ router.get(
 router.get(
 	ROUTES.ASSIGMENT_HINTS,
 	CatchAsync(assignmentController.loadHints.bind(assignmentController))
+);
+router.post(
+	ROUTES.ASSIGNMENT_DOWNLOAD,
+	[authJwt],
+	CatchAsync(assignmentController.downloadAssignment)
 );
 export default router;
