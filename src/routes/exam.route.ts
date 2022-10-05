@@ -21,6 +21,10 @@ router
 	);
 router
 	.route(ROUTES.ROSTER_GROUP_PARAM)
+	.get(
+		[authJwt, validId],
+		CatchAsync(examController.findRosterGroup.bind(examController))
+	)
 	.patch(
 		[authJwt, validId, validateRequest],
 		CatchAsync(examController.updateRosterGroup.bind(examController))

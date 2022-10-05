@@ -4,10 +4,8 @@ import { Socket } from 'socket.io';
 import { StudentClassRoom } from '../models';
 
 const notifySocket = (socket: Socket) => {
-	let currentSlideId = null;
 	console.log('Welcome to notify namspace');
-
-	socket.on('join', async (userId: string) => {
+	socket.on('join', (userId: string) => {
 		socket.join(userId);
 	});
 
@@ -50,14 +48,22 @@ const notifySocket = (socket: Socket) => {
 			userFullname: string,
 			linkTo: string
 		) => {
-			console.log('hihihi');
 			const rosterGroup = await RosterGroup.findById(rosterGroupId).populate(
-				'students'
+				{
+					path: 'students',
+					populate: {
+						path: 'student',
+						select: '_id',
+						options: {
+							justOne: true,
+						},
+					},
+				}
 			);
-			const recievers = rosterGroup.students.map((student) =>
-				student.toString()
+			const recievers = rosterGroup.students.map((std: any) =>
+				std.student._id.toString()
 			);
-			console.log(recievers);
+			console.log(rosterGroup.students, recievers);
 			const notify = await Notify.create({
 				content: `<span className='name' style="font-weight: 600">${userFullname}</span>&nbsp;&nbsp;vừa gán bạn vào nhóm thi ${rosterGroupName}`,
 				type: 'app/models/user.model',

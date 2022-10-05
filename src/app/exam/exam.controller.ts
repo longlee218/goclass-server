@@ -3,8 +3,6 @@ import { EnumStatusRoster, EnumStatusRosterGroup } from '../../config/enum';
 import { NextFunction, Request, Response } from 'express';
 import { _200, _400, _404 } from '../../config/message_code';
 
-import Assignment from '../../models/assignment.model';
-import AssignmentStream from '../../models/assignment_stream.model';
 import BaseController from '../../core/base.controller';
 import { Exam } from '../../types/request';
 import HttpError from '../../utils/HttpError';
@@ -12,10 +10,8 @@ import HttpResponse from '../../utils/HttpResponse';
 import Roster from '../../models/roster.model';
 import RosterGroup from '../../models/roster_group.model';
 import Slide from '../../models/slides.model';
-import SlideStream from '../../models/slides_stream.model';
 import { Types } from 'mongoose';
 import examService from './exam.service';
-import { generateEncryptionKey } from '../../utils/Encryption';
 
 class ExamController extends BaseController {
 	async getRosterGroup(req: Request, res: Response, next: NextFunction) {
@@ -44,6 +40,21 @@ class ExamController extends BaseController {
 			res,
 			data: results,
 			statusCode: 201,
+		});
+	}
+
+	async findRosterGroup(req: Request, res: Response, next: NextFunction) {
+		const id = req.params.id;
+		const rosterGroup = await RosterGroup.findById(id)
+			.populate('students')
+			.populate('roster');
+		if (!rosterGroup) {
+			return res.sendStatus(404);
+		}
+		return new HttpResponse({
+			res,
+			data: rosterGroup,
+			statusCode: 200,
 		});
 	}
 
