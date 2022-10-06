@@ -1,9 +1,11 @@
+import { AssignmentFolder, User } from '../../models';
+import AssignmentWork, {
+	IAssignmentWorkDocument,
+} from '../../models/assignment_work.model';
 import { NextFunction, Request, Response } from 'express';
 
 import Assignment from '../../models/assignment.model';
-import { AssignmentFolder } from '../../models';
 import AssignmentStream from '../../models/assignment_stream.model';
-import AssignmentWork from '../../models/assignment_work.model';
 import BaseController from '../../core/base.controller';
 import { EnumStatusRoster } from '../../config/enum';
 import HttpResponse from '../../utils/HttpResponse';
@@ -113,21 +115,25 @@ export class AssignmentController extends BaseController {
 	}
 
 	async loadHints(req: Request, res: Response, next: NextFunction) {
-		const { rosterGroupId, slideId, userId } = req.query;
-		const assignWork = await AssignmentWork.findOne({
-			rosterGroupId,
-			workBy: userId,
-		});
-		const rosterGroup = await RosterGroup.findById(rosterGroupId);
+		const { assignWorkId, slideId, userId } = req.query;
+		const user = await User.findById(userId);
+		const assignWork = await AssignmentWork.findById(assignWorkId);
+		console.log(assignWork);
+		const isSupport = assignWork.workBy.toString() === userId;
+		const rosterGroup = await RosterGroup.findById(assignWork.rosterGroupId);
+
 		const selectStr = rosterGroup.isShowResult
 			? 'name desc points'
 			: 'name desc';
+
 		const slide = await Slide.findById(slideId).select(selectStr);
 		if (!assignWork) {
 			return new HttpResponse({
 				res,
 				data: {
+					user,
 					numSlide: 1,
+					isSupport,
 					...slide.toJSON(),
 					prevUrl: null,
 					nextUrl: null,
@@ -142,7 +148,7 @@ export class AssignmentController extends BaseController {
 				: examService.makeLinkEditor(
 						slideIds[index + 1],
 						assignWork.encryptKey,
-						rosterGroupId as string,
+						assignWorkId as string,
 						userId as string
 				  );
 		const prevUrl =
@@ -151,12 +157,14 @@ export class AssignmentController extends BaseController {
 				: examService.makeLinkEditor(
 						slideIds[index - 1],
 						assignWork.encryptKey,
-						rosterGroupId as string,
+						assignWorkId as string,
 						userId as string
 				  );
 		return new HttpResponse({
 			res,
 			data: {
+				user,
+				isSupport,
 				numSlide: index + 1,
 				...slide.toJSON(),
 				prevUrl,

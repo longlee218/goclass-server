@@ -31,7 +31,7 @@ const AssignmentWorkSchema: Schema = new Schema(
 		encryptKey: String,
 		assignmentId: {
 			type: Schema.Types.ObjectId,
-			ref: 'assignment_streams',
+			ref: 'assignments',
 		},
 		rosterGroupId: {
 			type: Schema.Types.ObjectId,
@@ -40,7 +40,7 @@ const AssignmentWorkSchema: Schema = new Schema(
 		slideIds: [
 			{
 				type: Schema.Types.ObjectId,
-				ref: 'slide_streams',
+				ref: 'slides',
 			},
 		],
 		isFinish: { type: Boolean, default: false },

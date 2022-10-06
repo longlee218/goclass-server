@@ -1,13 +1,13 @@
+import AssignmentWork from '../../models/assignment_work.model';
 import BaseService from '../../core/base.service';
+import { CLIENT_HOST_EDITOR } from '../../config/key';
 import { EnumStatusRosterGroup } from '../../config/enum';
+import { ISlideDocument } from '../../models/slides.model';
+import { IUserDocument } from '../../models/user.model';
 import RosterGroup from '../../models/roster_group.model';
 import { Types } from 'mongoose';
 import { generateEncryptionKey } from '../../utils/Encryption';
 import { saveToFirebase } from '../../utils/Firebase';
-import AssignmentWork from '../../models/assignment_work.model';
-import { IUserDocument } from '../../models/user.model';
-import { CLIENT_HOST_EDITOR } from '../../config/key';
-import { ISlideDocument } from '../../models/slides.model';
 
 class ExamService extends BaseService {
 	async findStudentInOtherGroup(
@@ -171,12 +171,12 @@ class ExamService extends BaseService {
 	makeLinkEditor(
 		slideId: string,
 		encryptKey: string,
-		rosterGroupId: string,
+		assignWorkId: string,
 		userId: string
 	) {
 		return (
 			CLIENT_HOST_EDITOR +
-			`/#room=${slideId},${encryptKey},${rosterGroupId},${userId}`
+			`/#room=${slideId},${encryptKey},${assignWorkId},${userId}`
 		);
 	}
 	async makeDataSlideToFirebase(
@@ -218,7 +218,7 @@ class ExamService extends BaseService {
 						link: self.makeLinkEditor(
 							assignWork.slideIds[0].toString(),
 							assignWork.encryptKey,
-							rosterGroupId.toString(),
+							assignWork._id.toString(),
 							user.id
 						),
 					};
@@ -229,7 +229,7 @@ class ExamService extends BaseService {
 				link: self.makeLinkEditor(
 					assignWork.slideIds[0].toString(),
 					assignWork.encryptKey,
-					rosterGroupId.toString(),
+					assignWork._id.toString(),
 					user.id
 				),
 			};

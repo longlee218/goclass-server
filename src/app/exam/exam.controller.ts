@@ -3,6 +3,7 @@ import { EnumStatusRoster, EnumStatusRosterGroup } from '../../config/enum';
 import { NextFunction, Request, Response } from 'express';
 import { _200, _400, _404 } from '../../config/message_code';
 
+import AssignmentWork from '../../models/assignment_work.model';
 import BaseController from '../../core/base.controller';
 import { Exam } from '../../types/request';
 import HttpError from '../../utils/HttpError';
@@ -48,12 +49,50 @@ class ExamController extends BaseController {
 		const rosterGroup = await RosterGroup.findById(id)
 			.populate('students')
 			.populate('roster');
+
+		const assignWorks = await AssignmentWork.find({
+			rosterGroupId: rosterGroup._id,
+		}).populate({
+			path: 'slideIds',
+			select: '_id name thumbnail points',
+			options: {
+				sort: 'order',
+			},
+		});
+		const studentInfos = rosterGroup.students.map((student) => {
+			const userId = student.student;
+			const assignWork = assignWorks.find(
+				({ workBy }) => workBy.toString() === userId.toString()
+			);
+			if (assignWork) {
+				return {
+					...student.toJSON(),
+					slideIds: assignWork.slideIds.map((item) => {
+						item = (item as any).toJSON();
+						return {
+							...item,
+							link: examService.makeLinkEditor(
+								item._id.toString(),
+								assignWork.encryptKey,
+								assignWork.id,
+								req.user.id
+							),
+						};
+					}),
+					encryptKey: assignWork.encryptKey,
+					isReject: assignWork.isReject,
+					isFinish: assignWork.isFinish,
+					assignmentId: assignWork.assignmentId,
+				};
+			}
+			return student;
+		});
 		if (!rosterGroup) {
 			return res.sendStatus(404);
 		}
 		return new HttpResponse({
 			res,
-			data: rosterGroup,
+			data: { ...rosterGroup.toJSON(), students: studentInfos },
 			statusCode: 200,
 		});
 	}

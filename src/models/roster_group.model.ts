@@ -9,7 +9,7 @@ import { EnumStatusRosterGroup } from '../config/enum';
 interface IRosterGroup extends SoftDeleteDocument {
 	name: string;
 	classRoom: Types.ObjectId;
-	students: Array<Types.ObjectId>;
+	students: Array<Types.ObjectId> | Array<any>;
 	studentFinishs: Array<Types.ObjectId>;
 	roster: Types.ObjectId;
 	isShowResult: boolean;
