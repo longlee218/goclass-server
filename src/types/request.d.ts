@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { EnumGender } from '../config/enum';
+import { EnumGender, EnumStatusRosterGroup } from '../config/enum';
 declare namespace Student {
 	export interface RequestAddStudent {
 		_id?: Types.ObjectId | string;
@@ -49,5 +49,18 @@ declare namespace Exam {
 		isHide: boolean;
 		isSuffer: boolean;
 		isFull: boolean;
+	}
+
+	export interface RequestUpdateRosterGroup {
+		classRoom: Types.ObjectId;
+		name: string;
+		students: Array<Types.ObjectId>;
+		isShowResult: boolean;
+		isBlock: boolean;
+		isCanHelp: boolean;
+		isHide: boolean;
+		isSuffer: boolean;
+		isFull: boolean;
+		status: EnumStatusRosterGroup;
 	}
 }

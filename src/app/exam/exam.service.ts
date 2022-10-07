@@ -33,25 +33,29 @@ class ExamService extends BaseService {
 		);
 	}
 
-	async getExam(studentIds: string[], isTodo: boolean) {
+	async getExam(
+		studentIds: string[],
+		userId: Types.ObjectId,
+		isTodo: boolean
+	) {
 		const groups = await RosterGroup.aggregate([
 			{
 				$match: {
 					students: { $elemMatch: { $in: studentIds } },
-					...(isTodo
-						? {
-								$or: [
-									{
-										status: EnumStatusRosterGroup.Ready,
-									},
-									{
-										status: EnumStatusRosterGroup.Online,
-									},
-								],
-						  }
-						: {
-								status: EnumStatusRosterGroup.Finished,
-						  }),
+					// ...(isTodo
+					// 	? {
+					// 			$or: [
+					// 				{
+					// 					status: EnumStatusRosterGroup.Ready,
+					// 				},
+					// 				{
+					// 					status: EnumStatusRosterGroup.Online,
+					// 				},
+					// 			],
+					// 	  }
+					// 	: {
+					// 			status: EnumStatusRosterGroup.Finished,
+					// 	  }),
 				},
 			},
 			{
@@ -116,6 +120,32 @@ class ExamService extends BaseService {
 			},
 			{
 				$lookup: {
+					from: 'assignment_works',
+					let: {
+						rosterGroupId: '$_id',
+						userId: userId,
+					},
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: ['$$rosterGroupId', '$rosterGroupId'],
+										},
+										{
+											$eq: ['$$userId', '$workBy'],
+										},
+									],
+								},
+							},
+						},
+					],
+					as: 'assignment_work',
+				},
+			},
+			{
+				$lookup: {
 					from: 'class_rooms',
 					localField: 'classRoom',
 					foreignField: '_id',
@@ -143,6 +173,7 @@ class ExamService extends BaseService {
 							isShowResult: '$isShowResult',
 							status: '$status',
 							assignment: { $first: '$assignment' },
+							assignment_work: { $first: '$assignment_work' },
 							createdAt: '$createdAt',
 							updatedAt: '$updatedAt',
 						},

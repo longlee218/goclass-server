@@ -46,4 +46,9 @@ router.post(
 	CatchAsync(examController.joinAssignment)
 );
 
+router.post(
+	'/assignment-work/finish',
+	CatchAsync(examController.finishAssignment)
+);
+
 export default router;

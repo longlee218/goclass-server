@@ -198,7 +198,7 @@ class ExamController extends BaseController {
 
 	async updateRosterGroup(req: Request, res: Response, next: NextFunction) {
 		const rosterGroupId = req.params.id as string;
-		const payload = req.body as Exam.RequestAddNewRosterGroup;
+		const payload = req.body as Exam.RequestUpdateRosterGroup;
 		const rosterGroup = await RosterGroup.findById(rosterGroupId).orFail(
 			() => new HttpError(_404, 404)
 		);
@@ -214,7 +214,7 @@ class ExamController extends BaseController {
 				isActive: true,
 				classRoom: classRoom._id,
 			}).select('student');
-			const studentIdsFull = studentsInClass.map(({ student }) => student);
+			const studentIdsFull = studentsInClass.map(({ _id }) => _id);
 			// const studentsInOtherGroup = await examService.findStudentInOtherGroup(
 			// 	rosterGroup.roster,
 			// 	studentIdsFull
@@ -248,7 +248,14 @@ class ExamController extends BaseController {
 			// 		}
 			// 	);
 			// }
-			payload.students = payload.students;
+			// payload.students = payload.students;
+		} else if (payload.status === EnumStatusRosterGroup.Finished) {
+			await AssignmentWork.updateMany(
+				{
+					rosterGroupId: rosterGroupId,
+				},
+				{ isFinish: true }
+			);
 		}
 		await rosterGroup.updateOne(payload);
 		const rosterGroups = await RosterGroup.find({
@@ -280,7 +287,6 @@ class ExamController extends BaseController {
 			}
 			await rosterGroup.delete();
 		} else {
-			const rosterGroup = await RosterGroup.findById(id);
 			await RosterGroup.deleteById(id);
 		}
 		const rosterGroups = await RosterGroup.find({
@@ -305,21 +311,8 @@ class ExamController extends BaseController {
 			student: user._id,
 		}).select('_id');
 		const mystudentsId = belongClassRooms.map(({ _id }) => _id);
-		const type = query.type;
-		switch (type) {
-			case 'todo':
-				const todoExams = await examService.getExam(mystudentsId, true);
-				return new HttpResponse({ res, data: todoExams });
-			case 'finish':
-				const finishExams = await examService.getExam(mystudentsId, false);
-				return new HttpResponse({ res, data: finishExams });
-			default:
-				throw new HttpError(
-					'Invalid query type: ' + query.type,
-					400,
-					'BAD_QUERY'
-				);
-		}
+		const response = await examService.getExam(mystudentsId, user._id, true);
+		return new HttpResponse({ res, data: response });
 	}
 
 	async joinAssignment(req: Request, res: Response, next: NextFunction) {
@@ -335,6 +328,21 @@ class ExamController extends BaseController {
 			data: results,
 			statusCode: 200,
 		});
+	}
+
+	async finishAssignment(req: Request, res: Response, next: NextFunction) {
+		const { assignWorkId, userId } = req.body;
+		const assignWork = await AssignmentWork.findById(assignWorkId);
+		if (assignWork.isFinish || assignWork.workBy.toString() !== userId) {
+			throw new HttpError(
+				'Bài tập này đã hoàn thành, không thể chỉnh sửa.',
+				400,
+				'ASSIGN_CLOSED'
+			);
+		}
+		assignWork.isFinish = true;
+		await assignWork.save();
+		return res.sendStatus(200);
 	}
 }
 

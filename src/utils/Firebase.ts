@@ -1,8 +1,10 @@
 import { decryptData, encryptData } from './Encryption';
 import { isFreeDrawElement, isLinearElement } from './TypeCheck';
+
 import { reconcileElements } from './Reconciliation';
-// @ts-ignore
 import serviceAccount from '../../firebase.json';
+
+// @ts-ignore
 
 let isFirebaseInitialized = false;
 let firebasePromise: Promise<typeof import('firebase/app').default> | null =
@@ -95,12 +97,10 @@ export const saveToFirebase = async (
 				reconciledElements: null,
 			};
 		}
-
 		const prevDocData = snapshot.data();
 		const prevElements = getSyncableElements(
 			await decryptedElements(prevDocData, roomKey)
 		);
-
 		const reconciledElements = getSyncableElements(
 			reconcileElements(elements, prevElements, appState)
 		);
@@ -152,11 +152,15 @@ export const decryptedElements = async (
 ) => {
 	const ciphertext = dataFromFirebase.ciphertext.toUint8Array();
 	const iv = dataFromFirebase.iv.toUint8Array();
-	const decrypted = await decryptData(iv, ciphertext, roomKey);
-	const decodedData = new TextDecoder('utf-8').decode(
-		new Uint8Array(decrypted)
-	);
-	return JSON.parse(decodedData);
+	try {
+		const decrypted = await decryptData(iv, ciphertext, roomKey);
+		const decodedData = new TextDecoder('utf-8').decode(
+			new Uint8Array(decrypted)
+		);
+		return JSON.parse(decodedData);
+	} catch (error) {
+		return JSON.parse('[]');
+	}
 };
 
 export const getSceneVersion = (elements: readonly any[]) =>

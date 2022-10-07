@@ -84,9 +84,9 @@ export const decryptData = async (
 	iv: Uint8Array,
 	encrypted: Uint8Array | ArrayBuffer,
 	privateKey: string
-) => {
+): Promise<ArrayBuffer> => {
 	const key = await getCryptoKey(privateKey, 'decrypt');
-	return crypto.webcrypto.subtle.decrypt(
+	return window.crypto.subtle.decrypt(
 		{
 			name: 'AES-GCM',
 			iv,

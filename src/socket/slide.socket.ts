@@ -46,6 +46,10 @@ const slideSocket = (socket: Socket) => {
 			await Library.create({ ...payload, user: userId });
 		}
 	});
+
+	socket.on('raiseHand', (slideId: string, userId: string) => {
+		socket.emit('raiseHand', slideId, userId);
+	});
 };
 
 export default slideSocket;
