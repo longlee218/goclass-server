@@ -342,6 +342,29 @@ class ExamController extends BaseController {
 		}
 		assignWork.isFinish = true;
 		await assignWork.save();
+		const rosterGroupId = assignWork.rosterGroupId;
+		await RosterGroup.findByIdAndUpdate(rosterGroupId, {
+			$addToSet: { studentFinishs: userId },
+		});
+		return res.sendStatus(200);
+	}
+
+	async rejectAssignment(req: Request, res: Response, next: NextFunction) {
+		const { assignWorkId } = req.body;
+		const assignWork = await AssignmentWork.findById(assignWorkId);
+		if (assignWork.isFinish || assignWork.workBy.toString() !== req.user.id) {
+			throw new HttpError(
+				'Bài tập này đã hoàn thành, không thể chỉnh sửa.',
+				400,
+				'ASSIGN_CLOSED'
+			);
+		}
+		assignWork.isFinish = true;
+		await assignWork.save();
+		const rosterGroupId = assignWork.rosterGroupId;
+		await RosterGroup.findByIdAndUpdate(rosterGroupId, {
+			$addToSet: { studentRejects: req.user._id },
+		});
 		return res.sendStatus(200);
 	}
 }

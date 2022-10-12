@@ -51,4 +51,10 @@ router.post(
 	CatchAsync(examController.finishAssignment)
 );
 
+router.post(
+	'/assignment-work/reject',
+	[authJwt],
+	CatchAsync(examController.rejectAssignment)
+);
+
 export default router;

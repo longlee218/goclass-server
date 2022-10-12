@@ -118,7 +118,6 @@ export class AssignmentController extends BaseController {
 		const { assignWorkId, slideId, userId } = req.query;
 		const user = await User.findById(userId);
 		const assignWork = await AssignmentWork.findById(assignWorkId);
-		console.log(assignWork);
 		const isSupport = assignWork.workBy.toString() === userId;
 		const rosterGroup = await RosterGroup.findById(assignWork.rosterGroupId);
 
@@ -133,7 +132,7 @@ export class AssignmentController extends BaseController {
 				data: {
 					user,
 					numSlide: 1,
-					isSupport,
+					isSupport: isSupport && rosterGroup.isCanHelp,
 					...slide.toJSON(),
 					prevUrl: null,
 					nextUrl: null,
@@ -164,7 +163,7 @@ export class AssignmentController extends BaseController {
 			res,
 			data: {
 				user,
-				isSupport,
+				isSupport: isSupport && rosterGroup.isCanHelp,
 				numSlide: index + 1,
 				...slide.toJSON(),
 				prevUrl,

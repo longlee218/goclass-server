@@ -4,6 +4,8 @@ import Assignment from '../models/assignment.model';
 import Library from '../models/library.model';
 import SlideStream from '../models/slides_stream.model';
 import { Socket } from 'socket.io';
+import RosterGroup from '../models/roster_group.model';
+import AssignmentWork from '../models/assignment_work.model';
 
 const joinSlide = (socket: Socket, slide: ISlideDocument) => {
 	socket.join(slide.id);
@@ -18,6 +20,13 @@ const slideSocket = (socket: Socket) => {
 		if (slide) {
 			currentSlideId = slide;
 			joinSlide(socket, slide);
+		}
+	});
+
+	socket.on('join-assign', async (rosterGroupId: string) => {
+		const rosterGroup = await RosterGroup.findById(rosterGroupId);
+		if (rosterGroup) {
+			socket.join(rosterGroup.id);
 		}
 	});
 
@@ -47,9 +56,18 @@ const slideSocket = (socket: Socket) => {
 		}
 	});
 
-	socket.on('raiseHand', (slideId: string, userId: string) => {
-		socket.emit('raiseHand', slideId, userId);
-	});
+	socket.on(
+		'raiseHand',
+		async (assignWorkId: string, slideId: string, userId: string) => {
+			console.log('raiseHand comming...', slideId, userId);
+			const assignWork = await AssignmentWork.findById(assignWorkId);
+			if (assignWork) {
+				socket.broadcast
+					.to(assignWork.rosterGroupId.toString())
+					.emit('raiseHand', slideId, userId);
+			}
+		}
+	);
 };
 
 export default slideSocket;

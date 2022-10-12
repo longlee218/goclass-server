@@ -4,7 +4,6 @@ import { AssignmentFolder } from '../../models';
 import AssignmentStream from '../../models/assignment_stream.model';
 import BaseService from '../../core/base.service';
 import { EnumStatusRoster } from '../../config/enum';
-import HttpError from '../../utils/HttpError';
 import { IUserDocument } from '../../models/user.model';
 import Roster from '../../models/roster.model';
 import Slide from '../../models/slides.model';
@@ -272,11 +271,9 @@ export class AssignmentService extends BaseService {
 		const results = await AssignmentStream.find({ ...q })
 			.populate({
 				path: 'slides',
-				select: '_id name thumbnail createdAt',
-				options: {
-					limit: 1,
-				},
+				select: '_id name thumbnail assignment createdAt',
 			})
+			.sort('-createdAt')
 			.lean();
 		return results;
 	}
@@ -284,7 +281,7 @@ export class AssignmentService extends BaseService {
 	async findSharedAssignment(id: string) {
 		const result = await AssignmentStream.findById(id).populate({
 			path: 'slides',
-			select: 'order name thumbnail points',
+			select: 'order name thumbnail points assignment elements slideCounts',
 			options: {
 				sort: 'order',
 			},

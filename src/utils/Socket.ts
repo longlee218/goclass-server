@@ -9,8 +9,14 @@ function SocketServer(httpServer: http.Server) {
 		path: '/socket',
 		cors: {
 			credentials: true,
-			origin: ['http://localhost:3001', 'https://admin.socket.io'],
+			methods: ['POST', 'GET'],
+			origin: [
+				'http://localhost:3001', // main client
+				'http://localhost:3000', // editor client
+				'https://admin.socket.io', // dev
+			],
 		},
+		allowEIO3: true,
 	});
 	io.on('connection', (socket) => {
 		console.log('a user connected');
